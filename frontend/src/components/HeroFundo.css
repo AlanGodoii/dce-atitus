@@ -1,0 +1,68 @@
+.hero-fundo {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /* Verde sólido por baixo: é o que aparece se não houver nenhuma foto,
+     e evita um flash branco enquanto a primeira imagem carrega. */
+  background: linear-gradient(160deg, var(--verde-800) 0%, var(--verde-900) 100%);
+}
+
+.hero-fundo__foto {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.4s ease-in-out;
+  /* Zoom lento dá vida à foto parada, sem distrair de quem lê o texto. */
+  animation: hero-zoom 18s ease-in-out infinite alternate;
+}
+
+.hero-fundo__foto--ativa {
+  opacity: 1;
+}
+
+@keyframes hero-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.07);
+  }
+}
+
+/* O véu é o que torna o texto legível sobre qualquer foto — mais escuro
+   embaixo, onde ficam o subtítulo e os botões. */
+.hero-fundo__veu {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(10, 42, 35, 0.78) 0%,
+      rgba(15, 59, 49, 0.82) 45%,
+      rgba(10, 42, 35, 0.92) 100%
+    ),
+    linear-gradient(120deg, rgba(15, 59, 49, 0.55) 0%, rgba(10, 42, 35, 0.3) 100%);
+}
+
+.hero-fundo__tracos {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+}
+
+.hero-fundo__tracos path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.13);
+  stroke-width: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-fundo__foto {
+    animation: none;
+    transition: none;
+  }
+}

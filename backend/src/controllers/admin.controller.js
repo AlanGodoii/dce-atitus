@@ -2,7 +2,11 @@ import { prisma } from '../config/prisma.js';
 import { AppError } from '../utils/AppError.js';
 import { formatarCpf, formatarTelefoneExibicao } from '../utils/validadores.js';
 import { ROTULO_NIVEL } from '../validators/perfil.validator.js';
-import { calcularValidade, gerarArquivosCarteirinha } from '../services/carteirinha.service.js';
+import {
+  calcularValidade,
+  gerarArquivosCarteirinha,
+  reemitirCarteirinha,
+} from '../services/carteirinha.service.js';
 import { enviarCarteirinhaAprovada, enviarPagamentoRejeitado } from '../services/email.service.js';
 import { urlValidacao } from '../services/qrcode.service.js';
 
@@ -44,6 +48,11 @@ function serializarPagamento(pagamento) {
       curso: perfil.curso,
       nivelRotulo: ROTULO_NIVEL[perfil.nivel] ?? perfil.nivel,
       fotoUrl: perfil.fotoUrl,
+      perfilId: perfil.id,
+      // O arquivo em si sai por rota autenticada, nunca por URL publica.
+      temComprovante: Boolean(perfil.comprovanteArquivo),
+      comprovanteTipo: perfil.comprovanteTipo,
+      comprovanteEm: perfil.comprovanteEm,
     },
   };
 }
@@ -247,8 +256,12 @@ export async function listarEstudantes(req, res) {
           ? formatarTelefoneExibicao(perfil.usuario.whatsapp)
           : null,
         cpfFormatado: formatarCpf(perfil.cpf),
+        temComprovante: Boolean(perfil.comprovanteArquivo),
         matricula: perfil.matricula,
         curso: perfil.curso,
+        // Valores crus tambem, para o formulario de correcao do admin.
+        nivel: perfil.nivel,
+        dataNascimento: perfil.dataNascimento.toISOString().slice(0, 10),
         nivelRotulo: ROTULO_NIVEL[perfil.nivel] ?? perfil.nivel,
         fotoUrl: perfil.fotoUrl,
         cadastradoEm: perfil.usuario.criadoEm,
@@ -266,6 +279,129 @@ export async function listarEstudantes(req, res) {
       };
     }),
   });
+}
+
+/**
+ * Correção de dados pelo DCE.
+ *
+ * O estudante não consegue mexer nos campos impressos depois da emissão, para
+ * o documento em circulação não divergir do banco. Aqui o admin consegue — e
+ * justamente por isso, quando a carteirinha já existe, ela é reemitida na hora
+ * com o mesmo QR e reenviada por e-mail. Corrigir sem reemitir seria criar a
+ * divergência que o bloqueio do estudante existe para evitar.
+ */
+export async function editarEstudante(req, res) {
+  const { perfilId } = req.params;
+  const { nome, cpf, dataNascimento, matricula, curso, nivel, whatsapp } = req.body;
+
+  const perfil = await prisma.perfilEstudante.findUnique({
+    where: { id: perfilId },
+    include: {
+      usuario: true,
+      carteirinhas: { orderBy: { criadoEm: 'desc' }, take: 1 },
+    },
+  });
+
+  if (!perfil) throw AppError.naoEncontrado('Estudante não encontrado.');
+
+  const donoDoCpf = await prisma.perfilEstudante.findUnique({ where: { cpf } });
+  if (donoDoCpf && donoDoCpf.id !== perfil.id) {
+    throw AppError.conflito('Este CPF já está cadastrado em outra conta.');
+  }
+
+  const antes = {
+    nome: perfil.usuario.nome,
+    cpf: perfil.cpf,
+    matricula: perfil.matricula,
+    curso: perfil.curso,
+    nivel: perfil.nivel,
+    dataNascimento: perfil.dataNascimento.toISOString().slice(0, 10),
+  };
+
+  await prisma.$transaction([
+    prisma.usuario.update({ where: { id: perfil.usuarioId }, data: { nome, whatsapp } }),
+    prisma.perfilEstudante.update({
+      where: { id: perfil.id },
+      data: { cpf, dataNascimento, matricula, curso, nivel },
+    }),
+  ]);
+
+  const depois = {
+    nome,
+    cpf,
+    matricula,
+    curso,
+    nivel,
+    dataNascimento: new Date(dataNascimento).toISOString().slice(0, 10),
+  };
+
+  const alterados = Object.keys(depois).filter((k) => String(antes[k]) !== String(depois[k]));
+
+  // Rastro no log: quem mexeu, em quem, e o que mudou.
+  console.log(
+    `[admin] ${req.usuario.email} editou o perfil de ${perfil.usuario.email}` +
+      (alterados.length ? ` — campos: ${alterados.join(', ')}` : ' — sem mudanças'),
+  );
+
+  const carteirinha = perfil.carteirinhas[0];
+  const precisaReemitir = carteirinha?.status === 'aprovada' && alterados.length > 0;
+
+  let reemissao = { reemitida: false };
+  let email = { enviado: false, motivo: 'Carteirinha não estava emitida.' };
+
+  if (precisaReemitir) {
+    try {
+      const { carteirinha: atualizada, arquivos, usuario } = await reemitirCarteirinha(carteirinha.id);
+      reemissao = { reemitida: true, arquivoUrl: arquivos.frenteUrl, pdfUrl: arquivos.pdfUrl };
+
+      email = await enviarCarteirinhaAprovada({
+        usuario: { ...usuario, nome },
+        carteirinha: atualizada,
+        caminhos: arquivos.caminhos,
+      });
+    } catch (erro) {
+      console.error('[admin] falha ao reemitir apos edicao:', erro);
+      reemissao = { reemitida: false, erro: erro.message };
+    }
+  }
+
+  const atualizado = await prisma.perfilEstudante.findUnique({
+    where: { id: perfil.id },
+    include: { usuario: true },
+  });
+
+  return res.json({
+    mensagem: precisaReemitir
+      ? `Dados de ${nome} corrigidos e carteirinha reemitida.`
+      : `Dados de ${nome} atualizados.`,
+    camposAlterados: alterados,
+    estudante: {
+      perfilId: atualizado.id,
+      nome: atualizado.usuario.nome,
+      email: atualizado.usuario.email,
+      cpfFormatado: formatarCpf(atualizado.cpf),
+      matricula: atualizado.matricula,
+      curso: atualizado.curso,
+      nivelRotulo: ROTULO_NIVEL[atualizado.nivel] ?? atualizado.nivel,
+    },
+    reemissao,
+    email,
+  });
+}
+
+/** Regera os arquivos sem mexer em dado nenhum. Usado quando o endereço público
+ *  do sistema muda e os QR antigos passam a apontar para o lugar errado. */
+export async function regerarCarteirinha(req, res) {
+  try {
+    const { arquivos, usuario } = await reemitirCarteirinha(req.params.carteirinhaId);
+    return res.json({
+      mensagem: `Carteirinha de ${usuario.nome} regerada.`,
+      arquivoUrl: arquivos.frenteUrl,
+      pdfUrl: arquivos.pdfUrl,
+    });
+  } catch (erro) {
+    throw new AppError(erro.message, 409);
+  }
 }
 
 export async function resumo(_req, res) {

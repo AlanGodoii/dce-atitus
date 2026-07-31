@@ -210,7 +210,31 @@ if (urlFoto) {
 }
 
 r = await req('GET', '/perfil', null, token);
-checar('prontoParaPagamento=true depois da foto', r.dados.prontoParaPagamento === true, JSON.stringify(r.dados));
+checar('temFoto=true depois do upload', r.dados.temFoto === true);
+// Foto sozinha nao basta: o comprovante de matricula tambem e exigido.
+checar(
+  'ainda NAO esta pronto: falta o comprovante',
+  r.dados.prontoParaPagamento === false,
+  JSON.stringify(r.dados.pendencias),
+);
+checar('aponta a pendencia do comprovante', (r.dados.pendencias ?? []).some((p) => /comprovante/i.test(p)));
+
+console.log('\n== comprovante de matricula ==');
+const pdfMatricula = Buffer.from(
+  '%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF',
+  'latin1',
+);
+const fdComp = new FormData();
+fdComp.append('comprovante', new Blob([pdfMatricula], { type: 'application/pdf' }), 'matricula.pdf');
+const rComp = await fetch(`${BASE}/perfil/comprovante`, {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${token}` },
+  body: fdComp,
+});
+checar('comprovante aceito', rComp.status === 200);
+
+r = await req('GET', '/perfil', null, token);
+checar('prontoParaPagamento=true com foto + comprovante', r.dados.prontoParaPagamento === true, JSON.stringify(r.dados.pendencias));
 
 console.log('\n== seguranca ==');
 r = await req('GET', '/perfil', null, null);

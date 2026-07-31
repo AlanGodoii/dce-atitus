@@ -32,3 +32,5 @@ Thumbs.db
 
 # Configuração de ferramentas de desenvolvimento, local e pessoal
 .claude/
+
+backend/privado/

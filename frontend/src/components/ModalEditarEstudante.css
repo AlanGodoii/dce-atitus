@@ -1,0 +1,88 @@
+.modal {
+  border: none;
+  border-radius: var(--raio-xl);
+  padding: 0;
+  /* O reset global (`* { margin: 0 }`) apaga o `margin: auto` que o navegador
+     usa para centralizar um <dialog> aberto com showModal(). Sem isto ele
+     encosta no canto superior esquerdo. */
+  margin: auto;
+  width: min(620px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  box-shadow: var(--sombra-lg);
+  color: var(--cinza-900);
+}
+
+.modal::backdrop {
+  background: rgba(10, 42, 35, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.modal form {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 64px);
+}
+
+.modal__topo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 26px 18px;
+  border-bottom: 1px solid var(--cinza-100);
+}
+
+.modal__topo h2 {
+  font-size: 1.22rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.modal__topo p {
+  font-size: 0.9rem;
+  color: var(--cinza-500);
+  margin-top: 2px;
+  overflow-wrap: anywhere;
+}
+
+.modal__fechar {
+  border: none;
+  background: none;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--cinza-500);
+  cursor: pointer;
+  padding: 0 6px;
+  border-radius: var(--raio-sm);
+  flex-shrink: 0;
+}
+
+.modal__fechar:hover {
+  background: var(--cinza-100);
+  color: var(--cinza-900);
+}
+
+/* O corpo rola sozinho: em telas baixas o rodapé com os botões precisa
+   continuar visível, senão o admin não acha o "Salvar". */
+.modal__corpo {
+  padding: 22px 26px 4px;
+  overflow-y: auto;
+}
+
+.modal__rodape {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px 26px 22px;
+  border-top: 1px solid var(--cinza-100);
+  background: var(--cinza-50);
+}
+
+@media (max-width: 560px) {
+  .modal__rodape {
+    flex-direction: column-reverse;
+  }
+  .modal__rodape .btn {
+    width: 100%;
+  }
+}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api, mensagemDeErro } from '../services/api';
+import { abrirArquivoProtegido, api, mensagemDeErro } from '../services/api';
 import Carregando from '../components/Carregando';
 import './Painel.css';
 
@@ -68,6 +68,15 @@ export default function AdminPagamentos() {
       setErro(mensagemDeErro(e));
     } finally {
       setProcessando(null);
+    }
+  }
+
+  async function verComprovante(pagamento) {
+    setErro('');
+    try {
+      await abrirArquivoProtegido(`/admin/estudantes/${pagamento.estudante.perfilId}/comprovante`);
+    } catch (e) {
+      setErro(mensagemDeErro(e, 'Não foi possível abrir o comprovante.'));
     }
   }
 
@@ -243,6 +252,24 @@ export default function AdminPagamentos() {
             </div>
 
             <div className="fila-acoes">
+              {p.estudante.temComprovante ? (
+                <button
+                  type="button"
+                  className="btn btn-contorno btn-sm"
+                  onClick={() => verComprovante(p)}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+                    <path d="M14 2.5H7a2 2 0 00-2 2v15a2 2 0 002 2h10a2 2 0 002-2V7.5z" />
+                    <path d="M14 2.5v5h5" />
+                  </svg>
+                  Ver matrícula
+                </button>
+              ) : (
+                <span className="selo selo-rejeitada" style={{ justifyContent: 'center' }}>
+                  Sem comprovante
+                </span>
+              )}
+
               <button
                 type="button"
                 className="btn btn-primario btn-sm"

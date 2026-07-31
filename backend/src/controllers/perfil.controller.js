@@ -2,7 +2,8 @@ import { prisma } from '../config/prisma.js';
 import { AppError } from '../utils/AppError.js';
 import { formatarCpf } from '../utils/validadores.js';
 import { processarFotoPerfil } from '../services/foto.service.js';
-import { removerArquivoSilencioso, urlParaCaminho } from '../config/storage.js';
+import { removerComprovante, salvarComprovante } from '../services/comprovante.service.js';
+import { caminhoComprovante, removerArquivoSilencioso, urlParaCaminho } from '../config/storage.js';
 
 // Campos que saem impressos na carteirinha: uma vez emitida, mudar qualquer um
 // deles faria o documento em circulacao divergir do banco.
@@ -23,6 +24,10 @@ export function serializarPerfil(usuario) {
     curso: perfil.curso,
     nivel: perfil.nivel,
     fotoUrl: perfil.fotoUrl,
+    // O arquivo em si nunca vai na resposta — so a informacao de que existe.
+    temComprovante: Boolean(perfil.comprovanteArquivo),
+    comprovanteTipo: perfil.comprovanteTipo,
+    comprovanteEm: perfil.comprovanteEm,
     criadoEm: perfil.criadoEm,
     atualizadoEm: perfil.atualizadoEm,
   };
@@ -36,12 +41,22 @@ export async function obterPerfil(req, res) {
 
   const perfil = serializarPerfil(usuario);
 
+  const temFoto = Boolean(perfil?.fotoUrl);
+  const temComprovante = Boolean(perfil?.temComprovante);
+
   return res.json({
     perfil,
     completo: Boolean(perfil),
-    temFoto: Boolean(perfil?.fotoUrl),
-    // O aluno so avanca para o pagamento com todos os dados + foto.
-    prontoParaPagamento: Boolean(perfil && perfil.fotoUrl),
+    temFoto,
+    temComprovante,
+    // O aluno so entra na fila do DCE com dados, foto E comprovante de matricula:
+    // e o comprovante que da lastro ao "confirmamos a condicao de estudante".
+    prontoParaPagamento: Boolean(perfil) && temFoto && temComprovante,
+    pendencias: [
+      !perfil && 'Preencha seus dados.',
+      perfil && !temFoto && 'Envie a sua foto 3x4.',
+      perfil && !temComprovante && 'Envie o comprovante de matrícula.',
+    ].filter(Boolean),
   });
 }
 
@@ -148,4 +163,75 @@ export async function enviarFoto(req, res) {
   removerArquivoSilencioso(fotoAnterior);
 
   return res.json({ mensagem: 'Foto atualizada.', fotoUrl: url });
+}
+
+// --- comprovante de matrícula -----------------------------------------------
+
+export async function enviarComprovante(req, res) {
+  const perfil = await prisma.perfilEstudante.findUnique({
+    where: { usuarioId: req.usuario.id },
+    include: { carteirinhas: { orderBy: { criadoEm: 'desc' }, take: 1 } },
+  });
+
+  if (!perfil) {
+    throw new AppError('Preencha seus dados antes de enviar o comprovante.', 409);
+  }
+
+  // Diferente da foto, o comprovante NAO e impresso na carteirinha — trocar
+  // depois da emissao nao cria divergencia com o documento em circulacao. E o
+  // DCE pode querer uma versao mais recente a cada semestre.
+  const anterior = perfil.comprovanteArquivo;
+  const { arquivo, tipo } = await salvarComprovante(req.file.buffer, perfil.id);
+
+  await prisma.perfilEstudante.update({
+    where: { id: perfil.id },
+    data: { comprovanteArquivo: arquivo, comprovanteTipo: tipo, comprovanteEm: new Date() },
+  });
+
+  await removerComprovante(anterior);
+
+  return res.json({
+    mensagem: 'Comprovante de matrícula enviado. O DCE vai conferir junto com o pagamento.',
+    temComprovante: true,
+    comprovanteTipo: tipo,
+  });
+}
+
+/**
+ * Entrega o arquivo do comprovante. Nunca servido estaticamente: passa por aqui
+ * justamente para checar quem esta pedindo.
+ *
+ * @param {string} perfilId  quando ausente, entrega o do proprio usuario logado
+ */
+export async function baixarComprovante(req, res) {
+  const ehAdmin = req.usuario.role === 'admin';
+  const perfilId = req.params.perfilId;
+
+  if (perfilId && !ehAdmin) {
+    throw AppError.proibido('Você só pode acessar o seu próprio comprovante.');
+  }
+
+  const perfil = perfilId
+    ? await prisma.perfilEstudante.findUnique({ where: { id: perfilId } })
+    : await prisma.perfilEstudante.findUnique({ where: { usuarioId: req.usuario.id } });
+
+  if (!perfil?.comprovanteArquivo) {
+    throw AppError.naoEncontrado('Nenhum comprovante de matrícula enviado.');
+  }
+
+  const caminho = caminhoComprovante(perfil.comprovanteArquivo);
+  if (!caminho) throw AppError.naoEncontrado('Arquivo do comprovante não encontrado.');
+
+  // `inline` deixa abrir na aba; o nossniff + o tipo fixo evitam que o navegador
+  // trate o arquivo como algo executavel.
+  res.setHeader('Content-Type', perfil.comprovanteTipo ?? 'application/octet-stream');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Content-Disposition', `inline; filename="comprovante-matricula-${perfil.matricula}"`);
+  res.setHeader('Cache-Control', 'private, no-store');
+
+  return res.sendFile(caminho, (erro) => {
+    if (erro && !res.headersSent) {
+      res.status(404).json({ erro: 'Arquivo do comprovante não encontrado.' });
+    }
+  });
 }

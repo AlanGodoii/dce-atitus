@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api, errosPorCampo, mensagemDeErro } from '../services/api';
+import { abrirArquivoProtegido, api, errosPorCampo, mensagemDeErro } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import Carregando from '../components/Carregando';
 import AvisoEmailNaoVerificado from '../components/AvisoEmailNaoVerificado';
@@ -33,7 +33,12 @@ function mascararCpf(valor) {
 }
 
 function mascararTelefone(valor) {
-  const d = valor.replace(/\D/g, '').slice(0, 11);
+  let bruto = valor.replace(/\D/g, '');
+  // O banco guarda em E.164 (5554999998888). Sem tirar o 55, a máscara trataria
+  // o código do país como DDD e mostraria "(55) 54999-9988".
+  if (bruto.length >= 12 && bruto.startsWith('55')) bruto = bruto.slice(2);
+
+  const d = bruto.slice(0, 11);
   if (d.length <= 2) return d;
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
   if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
@@ -44,9 +49,12 @@ export default function MeuPerfil() {
   const { usuario, recarregar } = useAuth();
   const navegar = useNavigate();
   const inputFoto = useRef(null);
+  const inputComprovante = useRef(null);
 
   const [form, setForm] = useState(VAZIO);
   const [fotoUrl, setFotoUrl] = useState(null);
+  const [temComprovante, setTemComprovante] = useState(false);
+  const [enviandoComprovante, setEnviandoComprovante] = useState(false);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
   const [enviandoFoto, setEnviandoFoto] = useState(false);
@@ -64,6 +72,7 @@ export default function MeuPerfil() {
         if (data.perfil) {
           setJaTinhaPerfil(true);
           setFotoUrl(data.perfil.fotoUrl);
+          setTemComprovante(Boolean(data.temComprovante));
           setForm({
             nome: data.perfil.nome ?? '',
             cpf: mascararCpf(data.perfil.cpf ?? ''),
@@ -141,9 +150,40 @@ export default function MeuPerfil() {
     }
   }
 
+  async function enviarComprovante(evento) {
+    const arquivo = evento.target.files?.[0];
+    if (!arquivo) return;
+
+    setErro('');
+    setSucesso('');
+    setEnviandoComprovante(true);
+    const dados = new FormData();
+    dados.append('comprovante', arquivo);
+
+    try {
+      const { data } = await api.post('/perfil/comprovante', dados);
+      setTemComprovante(true);
+      setSucesso(data.mensagem);
+    } catch (e) {
+      setErro(mensagemDeErro(e, 'Não foi possível enviar o comprovante.'));
+    } finally {
+      setEnviandoComprovante(false);
+      if (inputComprovante.current) inputComprovante.current.value = '';
+    }
+  }
+
+  async function verComprovante() {
+    setErro('');
+    try {
+      await abrirArquivoProtegido('/perfil/comprovante');
+    } catch (e) {
+      setErro(mensagemDeErro(e, 'Não foi possível abrir o comprovante.'));
+    }
+  }
+
   if (carregando) return <Carregando texto="Carregando seu perfil..." />;
 
-  const completo = jaTinhaPerfil && Boolean(fotoUrl);
+  const completo = jaTinhaPerfil && Boolean(fotoUrl) && temComprovante;
 
   return (
     <div className="pagina__conteudo">
@@ -347,11 +387,105 @@ export default function MeuPerfil() {
               </div>
             </div>
 
+            <div className="separador" />
+
+            <h2 className="bloco-titulo">Comprovante de matrícula</h2>
+            <p className="bloco-sub">
+              É com ele que o DCE confirma que você é aluno da ATITUS.
+            </p>
+
+            <div className="foto-area">
+              <div
+                className={`foto-previa ${temComprovante ? '' : 'foto-previa--vazia'}`}
+                style={
+                  temComprovante
+                    ? {
+                        display: 'grid',
+                        placeItems: 'center',
+                        background: '#e8f6ee',
+                        color: 'var(--verde-700)',
+                        borderColor: 'var(--verde-500)',
+                      }
+                    : undefined
+                }
+              >
+                {temComprovante ? (
+                  <span style={{ textAlign: 'center', padding: 10 }}>
+                    <svg
+                      width="34"
+                      height="34"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.9"
+                      style={{ margin: '0 auto 8px', display: 'block' }}
+                    >
+                      <path d="M14 2.5H7a2 2 0 00-2 2v15a2 2 0 002 2h10a2 2 0 002-2V7.5z" />
+                      <path d="M14 2.5v5h5M8.5 14.5l2.2 2.2 4.3-4.6" />
+                    </svg>
+                    <strong style={{ fontSize: '0.82rem' }}>Enviado</strong>
+                  </span>
+                ) : (
+                  'Nenhum comprovante enviado'
+                )}
+              </div>
+
+              <div className="foto-acoes">
+                <p>
+                  Vale o comprovante de matrícula ou o atestado de vínculo emitido pela ATITUS, do
+                  semestre atual. PDF, JPG, PNG ou WEBP de até 10 MB.
+                </p>
+
+                <input
+                  ref={inputComprovante}
+                  id="comprovante"
+                  type="file"
+                  accept="application/pdf,image/jpeg,image/png,image/webp"
+                  onChange={enviarComprovante}
+                  className="apenas-leitor"
+                  disabled={!jaTinhaPerfil || enviandoComprovante}
+                />
+
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  <label
+                    htmlFor="comprovante"
+                    className={`btn ${temComprovante ? 'btn-contorno' : 'btn-primario'} btn-sm`}
+                    style={
+                      !jaTinhaPerfil || enviandoComprovante
+                        ? { opacity: 0.55, cursor: 'not-allowed', pointerEvents: 'none' }
+                        : { cursor: 'pointer' }
+                    }
+                  >
+                    {enviandoComprovante
+                      ? 'Enviando...'
+                      : temComprovante
+                        ? 'Trocar comprovante'
+                        : 'Enviar comprovante'}
+                  </label>
+
+                  {temComprovante ? (
+                    <button type="button" className="btn btn-contorno btn-sm" onClick={verComprovante}>
+                      Ver enviado
+                    </button>
+                  ) : null}
+                </div>
+
+                {!jaTinhaPerfil ? (
+                  <p className="ajuda" style={{ marginTop: 10 }}>
+                    Salve os dados acima antes de enviar o comprovante.
+                  </p>
+                ) : null}
+              </div>
+            </div>
+
             {completo ? (
               <>
                 <div className="separador" />
                 <div className="aviso aviso-ok" style={{ marginBottom: 0 }}>
-                  Perfil completo. Vá para <strong>Carteira Digital</strong> para fazer o pagamento.
+                  <span>
+                    Perfil completo. Vá para <strong>Carteira Digital</strong> para fazer o
+                    pagamento.
+                  </span>
                 </div>
               </>
             ) : null}

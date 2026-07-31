@@ -15,3 +15,6 @@ src/prisma/migrations/dev.db*
 npm-debug.log*
 
 .DS_Store
+
+# Documentos privados dos alunos (comprovante de matricula) - LGPD
+privado/

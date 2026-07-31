@@ -1,9 +1,15 @@
 import { Router } from 'express';
-import { enviarFoto, obterPerfil, salvarPerfil } from '../controllers/perfil.controller.js';
+import {
+  baixarComprovante,
+  enviarComprovante,
+  enviarFoto,
+  obterPerfil,
+  salvarPerfil,
+} from '../controllers/perfil.controller.js';
 import { requireAuth } from '../middlewares/auth.middleware.js';
 import { requireEmailVerificado } from '../middlewares/email-verificado.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
-import { uploadFoto } from '../middlewares/upload.middleware.js';
+import { uploadComprovante, uploadFoto } from '../middlewares/upload.middleware.js';
 import { perfilSchema } from '../validators/perfil.validator.js';
 
 const router = Router();
@@ -15,5 +21,8 @@ router.use(requireAuth, requireEmailVerificado);
 router.get('/', obterPerfil);
 router.post('/', validate(perfilSchema), salvarPerfil);
 router.post('/foto', uploadFoto, enviarFoto);
+
+router.post('/comprovante', uploadComprovante, enviarComprovante);
+router.get('/comprovante', baixarComprovante);
 
 export default router;

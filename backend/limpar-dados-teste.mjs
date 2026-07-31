@@ -11,14 +11,14 @@
  */
 import fs from 'node:fs';
 import { prisma } from './src/config/prisma.js';
-import { urlParaCaminho } from './src/config/storage.js';
+import { caminhoComprovante, urlParaCaminho } from './src/config/storage.js';
 
 const APAGAR = process.argv.includes('--apagar');
 
 // Deliberadamente estritos: exigem o timestamp no endereço, para nunca casar
 // com o e-mail de uma pessoa de verdade.
 const PADROES_TESTE = [
-  /^(verif|link|reenvio|fluxo|perfil|outro|rejeita|naoverif)\.\d{10,}@gmail\.com$/,
+  /^(verif|link|reenvio|fluxo|perfil|outro|rejeita|naoverif|comp|bisb)\.\d{10,}@gmail\.com$/,
   /^teste\.alan\.\d{10,}@gmail\.com$/,
   /^\d{10,}\+.+@/,
   /^alan\.godoicc\+(aluno|rejeitado)\d+@gmail\.com$/,
@@ -39,6 +39,7 @@ const usuarios = await prisma.usuario.findMany({
     perfil: {
       select: {
         fotoUrl: true,
+        comprovanteArquivo: true,
         carteirinhas: { select: { arquivoUrl: true, arquivoVersoUrl: true } },
       },
     },
@@ -65,6 +66,7 @@ const arquivos = [];
 for (const u of alvos) {
   if (!u.perfil) continue;
   if (u.perfil.fotoUrl) arquivos.push(urlParaCaminho(u.perfil.fotoUrl));
+  if (u.perfil.comprovanteArquivo) arquivos.push(caminhoComprovante(u.perfil.comprovanteArquivo));
   for (const c of u.perfil.carteirinhas) {
     if (c.arquivoUrl) {
       arquivos.push(urlParaCaminho(c.arquivoUrl));

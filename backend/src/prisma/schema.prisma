@@ -87,6 +87,9 @@ model TokenVerificacao {
   @@map("tokens_verificacao_email")
 }
 
+/// O comprovante de matricula fica FORA de uploads/ (que e servido
+/// estaticamente) porque tem dado pessoal e so o dono e o admin podem ver.
+/// Guardamos o nome do arquivo, nao uma URL publica.
 model PerfilEstudante {
   id             String   @id @default(uuid()) @db.Uuid
   usuarioId      String   @unique @map("usuario_id") @db.Uuid
@@ -96,6 +99,13 @@ model PerfilEstudante {
   matricula      String      @db.VarChar(30)
   curso          String      @db.VarChar(120)
   nivel          NivelEnsino @default(graduacao)
+
+  /// Comprovante de matricula: so o nome do arquivo, guardado em privado/.
+  /// E o que da lastro ao "o DCE confirma a condicao de estudante" do verso.
+  comprovanteArquivo String?   @map("comprovante_arquivo") @db.VarChar(255)
+  comprovanteTipo    String?   @map("comprovante_tipo") @db.VarChar(60)
+  comprovanteEm      DateTime? @map("comprovante_em") @db.Timestamptz(6)
+
   criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
   atualizadoEm   DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(6)
 

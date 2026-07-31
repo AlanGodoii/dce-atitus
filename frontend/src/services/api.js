@@ -55,6 +55,18 @@ export function mensagemDeErro(erro, padrao = 'Algo deu errado. Tente novamente.
   return dados.erro ?? padrao;
 }
 
+/**
+ * Abre um arquivo servido por rota autenticada (o axios manda o Bearer, mas
+ * uma <a href> não mandaria). Busca como blob e abre numa aba nova.
+ */
+export async function abrirArquivoProtegido(caminho) {
+  const { data } = await api.get(caminho, { responseType: 'blob' });
+  const url = URL.createObjectURL(data);
+  window.open(url, '_blank', 'noopener');
+  // Revoga depois de dar tempo de a aba carregar.
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
 /** Mapa campo -> mensagem, para marcar o input exato que falhou. */
 export function errosPorCampo(erro) {
   const detalhes = erro?.response?.data?.detalhes;

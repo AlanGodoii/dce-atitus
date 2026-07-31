@@ -275,6 +275,9 @@ textarea {
 
 /* --- avisos --------------------------------------------------------------- */
 
+/* O gap vale para o ícone e o bloco de texto — por isso o conteúdo textual
+   precisa vir dentro de um elemento só. Um <strong> solto viraria item de
+   flex e ganharia espaçamento no meio da frase. */
 .aviso {
   display: flex;
   gap: 12px;

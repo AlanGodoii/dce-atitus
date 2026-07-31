@@ -54,21 +54,6 @@
   padding: calc(var(--header-h) + 74px) 0 96px;
 }
 
-.landing__hero-fundo {
-  position: absolute;
-  inset: 0;
-  opacity: 0.5;
-}
-.landing__hero-fundo svg {
-  width: 100%;
-  height: 100%;
-}
-.landing__hero-fundo path {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.13);
-  stroke-width: 2;
-}
-
 .landing__hero-inner {
   position: relative;
   z-index: 2;

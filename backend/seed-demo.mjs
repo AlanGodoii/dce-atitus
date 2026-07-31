@@ -166,6 +166,24 @@ async function garantirAluno(aluno, indice) {
     body: fd,
   });
 
+  // Comprovante de matrícula fictício, em PDF mínimo mas válido.
+  const pdf = Buffer.from(
+    `%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n` +
+      `2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n` +
+      `3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 595 842]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n` +
+      `4 0 obj<</Length 90>>stream\nBT /F1 16 Tf 60 760 Td (COMPROVANTE DE MATRICULA - DEMONSTRACAO) Tj ET\nendstream endobj\n` +
+      `5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\n` +
+      `trailer<</Root 1 0 R>>\n%%EOF`,
+    'latin1',
+  );
+  const fdComp = new FormData();
+  fdComp.append('comprovante', new Blob([pdf], { type: 'application/pdf' }), 'matricula.pdf');
+  await fetch(`${API}/perfil/comprovante`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: fdComp,
+  });
+
   if (aluno.ate === 'perfil') {
     console.log(`  ✓ ${aluno.nome} — aguardando pagamento`);
     return;

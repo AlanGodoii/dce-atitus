@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { prisma } from '../config/prisma.js';
 import { CAMINHOS, caminhoParaUrl, garantirPastas, urlParaCaminho } from '../config/storage.js';
 import { obterNavegador } from './navegador.js';
 import { DIMENSOES, htmlFrente, htmlVerso } from './carteirinha-template.js';
@@ -119,6 +120,39 @@ export async function gerarArquivosCarteirinha({ carteirinha, perfil, usuario })
     pdfUrl: caminhoParaUrl(caminhoPdf),
     caminhos: { frente: caminhoFrente, verso: caminhoVerso, pdf: caminhoPdf },
   };
+}
+
+/**
+ * Regera os arquivos de uma carteirinha ja emitida, mantendo o MESMO QR.
+ *
+ * Serve para dois casos: correcao de dados pelo DCE (o documento em circulacao
+ * passa a divergir do banco) e troca do endereco publico do sistema (o QR antigo
+ * aponta para um dominio que nao existe mais). Manter o uuid e essencial — se
+ * mudasse, quem ja imprimiu ficaria com um codigo invalido.
+ */
+export async function reemitirCarteirinha(carteirinhaId) {
+  const carteirinha = await prisma.carteirinha.findUnique({
+    where: { id: carteirinhaId },
+    include: { perfil: { include: { usuario: true } } },
+  });
+
+  if (!carteirinha) throw new Error('Carteirinha nao encontrada.');
+  if (carteirinha.status !== 'aprovada') {
+    throw new Error('So carteirinhas aprovadas podem ser reemitidas.');
+  }
+
+  const arquivos = await gerarArquivosCarteirinha({
+    carteirinha,
+    perfil: carteirinha.perfil,
+    usuario: carteirinha.perfil.usuario,
+  });
+
+  await prisma.carteirinha.update({
+    where: { id: carteirinha.id },
+    data: { arquivoUrl: arquivos.frenteUrl, arquivoVersoUrl: arquivos.versoUrl },
+  });
+
+  return { carteirinha, arquivos, usuario: carteirinha.perfil.usuario };
 }
 
 /** Preview sem QR, usado na area do estudante antes da aprovacao. */

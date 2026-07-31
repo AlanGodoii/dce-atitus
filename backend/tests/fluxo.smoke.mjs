@@ -47,6 +47,23 @@ async function registrarVerificado(dados) {
   return v.status === 200 ? { status: 201, dados: { ...r.dados, token: v.dados.token } } : r;
 }
 
+const PDF_MATRICULA = Buffer.from(
+  '%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF',
+  'latin1',
+);
+
+/** Comprovante de matricula e obrigatorio antes de entrar na fila do DCE. */
+async function enviarComprovante(token) {
+  const fd = new FormData();
+  fd.append('comprovante', new Blob([PDF_MATRICULA], { type: 'application/pdf' }), 'matricula.pdf');
+  const r = await fetch(`${BASE}/perfil/comprovante`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+    body: fd,
+  });
+  return r.status;
+}
+
 function gerarCpf() {
   const n = Array.from({ length: 9 }, () => Math.floor(Math.random() * 10));
   const dv = (base) => {
@@ -94,6 +111,7 @@ let rf = await fetch(`${BASE}/perfil/foto`, {
   body: fd,
 });
 checar('foto enviada', rf.status === 200);
+checar('comprovante de matricula enviado', (await enviarComprovante(tokenAluno)) === 200);
 
 console.log('\n== 2. carteirinha nasce aguardando pagamento, sem QR ==');
 r = await req('GET', '/carteirinha', null, tokenAluno);
@@ -205,6 +223,7 @@ await req('POST', '/perfil', {
 const fd2 = new FormData();
 fd2.append('foto', new Blob([foto], { type: 'image/jpeg' }), 'foto.jpg');
 await fetch(`${BASE}/perfil/foto`, { method: 'POST', headers: { Authorization: `Bearer ${token2}` }, body: fd2 });
+await enviarComprovante(token2);
 await req('POST', '/carteirinha/informar-pagamento', {}, token2);
 
 r = await req('GET', '/admin/pagamentos-pendentes', null, tokenAdmin);

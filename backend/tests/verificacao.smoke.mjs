@@ -144,6 +144,17 @@ rf = await fetch(`${BASE}/perfil/foto`, {
 });
 checar('enviar foto LIBERADO (200)', rf.status === 200);
 
+// Comprovante de matrícula também é exigido antes de entrar na fila do DCE.
+const pdf = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF', 'latin1');
+const fdComp = new FormData();
+fdComp.append('comprovante', new Blob([pdf], { type: 'application/pdf' }), 'matricula.pdf');
+const rc = await fetch(`${BASE}/perfil/comprovante`, {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${tokenPos}` },
+  body: fdComp,
+});
+checar('enviar comprovante LIBERADO (200)', rc.status === 200);
+
 r = await req('POST', '/carteirinha/informar-pagamento', { observacao: 'PIX feito' }, tokenPos);
 checar('informar-pagamento LIBERADO (200)', r.status === 200, JSON.stringify(r.dados).slice(0, 200));
 checar('status virou pagamento_em_analise', r.dados?.carteirinha?.status === 'pagamento_em_analise');

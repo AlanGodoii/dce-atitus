@@ -81,17 +81,25 @@ export async function obterCarteirinha(req, res) {
     });
   }
 
-  if (!perfil.fotoUrl) {
-    return res.json({
-      temPerfil: true,
-      carteirinha: null,
-      proximoPasso: 'Envie a sua foto 3x4 para solicitar a carteirinha.',
-    });
-  }
-
   const carteirinha = perfil.carteirinhas[0];
   if (!carteirinha) {
     return res.json({ temPerfil: true, carteirinha: null, proximoPasso: 'Perfil completo.' });
+  }
+
+  // As pendencias so bloqueiam a tela enquanto o aluno ainda nao entrou na fila.
+  // Depois disso — em analise, aprovada ou rejeitada — ele sempre ve a
+  // carteirinha, senao quem foi aprovado antes de existir a exigencia de
+  // comprovante perderia acesso ao proprio documento.
+  if (carteirinha.status === 'aguardando_pagamento') {
+    const pendencia = !perfil.fotoUrl
+      ? 'Envie a sua foto 3x4 para solicitar a carteirinha.'
+      : !perfil.comprovanteArquivo
+        ? 'Envie o comprovante de matrícula para solicitar a carteirinha.'
+        : null;
+
+    if (pendencia) {
+      return res.json({ temPerfil: true, carteirinha: null, proximoPasso: pendencia });
+    }
   }
 
   return res.json({
@@ -115,6 +123,13 @@ export async function informarPagamento(req, res) {
   const perfil = await carteirinhaDoUsuario(req.usuario.id);
   if (!perfil) throw new AppError('Complete o seu perfil primeiro.', 409);
   if (!perfil.fotoUrl) throw new AppError('Envie a sua foto antes de informar o pagamento.', 409);
+  // Sem comprovante o DCE nao tem como atestar a condicao de estudante, que e
+  // exatamente o que o verso da carteirinha afirma.
+  if (!perfil.comprovanteArquivo) {
+    throw new AppError('Envie o comprovante de matrícula antes de informar o pagamento.', 409, {
+      motivo: 'sem_comprovante',
+    });
+  }
 
   const carteirinha = perfil.carteirinhas[0];
   if (!carteirinha) throw AppError.naoEncontrado('Carteirinha não encontrada.');

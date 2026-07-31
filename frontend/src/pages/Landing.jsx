@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import LogoDce from '../components/LogoDce';
+import HeroFundo from '../components/HeroFundo';
 import { api } from '../services/api';
 import './Landing.css';
 
@@ -92,12 +93,7 @@ export default function Landing() {
       </header>
 
       <section className="landing__hero" id="inicio">
-        <div className="landing__hero-fundo" aria-hidden="true">
-          <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice">
-            <path d="M-100 700 L400 100 L900 700 M300 700 L800 100 L1300 700" />
-            <path d="M700 -50 L1250 400 M1250 -50 L700 400" />
-          </svg>
-        </div>
+        <HeroFundo />
 
         <div className="container landing__hero-inner">
           <span className="landing__selo">DCE · ATITUS EDUCAÇÃO</span>
@@ -109,7 +105,7 @@ export default function Landing() {
           </h1>
 
           <p className="landing__subtitulo">
-            A carteirinha oficial do Diretório Central de Estudantes da ATITUS.
+            A carteirinha oficial do Diretório Central Matheus Teixeira.
           </p>
           <p className="landing__apoio">
             Tenha sua carteirinha no celular e aproveite a meia-entrada garantida por lei.

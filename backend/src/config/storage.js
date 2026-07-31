@@ -11,12 +11,35 @@ export const CAMINHOS = {
   fotos: path.join(raizBackend, 'uploads', 'fotos'),
   carteirinhas: path.join(raizBackend, 'uploads', 'carteirinhas'),
   assets: path.join(raizBackend, 'src', 'assets'),
+
+  // Fora de uploads/ de proposito: uploads/ e servido estaticamente, e o
+  // comprovante de matricula nao pode ser acessivel por quem tiver a URL.
+  privado: path.join(raizBackend, 'privado'),
+  comprovantes: path.join(raizBackend, 'privado', 'comprovantes'),
 };
 
 export function garantirPastas() {
-  for (const dir of [CAMINHOS.uploads, CAMINHOS.fotos, CAMINHOS.carteirinhas]) {
+  for (const dir of [
+    CAMINHOS.uploads,
+    CAMINHOS.fotos,
+    CAMINHOS.carteirinhas,
+    CAMINHOS.privado,
+    CAMINHOS.comprovantes,
+  ]) {
     fs.mkdirSync(dir, { recursive: true });
   }
+}
+
+/**
+ * Resolve o caminho de um comprovante a partir do nome guardado no banco.
+ * Recusa qualquer nome que tente escapar da pasta (../, caminho absoluto).
+ */
+export function caminhoComprovante(nomeArquivo) {
+  if (!nomeArquivo) return null;
+  const seguro = path.basename(String(nomeArquivo));
+  if (seguro !== nomeArquivo) return null;
+  const completo = path.join(CAMINHOS.comprovantes, seguro);
+  return completo.startsWith(CAMINHOS.comprovantes) ? completo : null;
 }
 
 /** Converte um caminho absoluto em disco para a URL publica servida por /uploads. */

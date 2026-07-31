@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api, mensagemDeErro } from '../services/api';
+import { abrirArquivoProtegido, api, mensagemDeErro } from '../services/api';
 import Carregando from '../components/Carregando';
+import ModalEditarEstudante from '../components/ModalEditarEstudante';
 import './Painel.css';
 
 const STATUS = [
@@ -29,6 +30,8 @@ export default function AdminEstudantes() {
   const [status, setStatus] = useState('');
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
+  const [aviso, setAviso] = useState('');
+  const [editando, setEditando] = useState(null);
 
   const carregar = useCallback(async (termo, filtroStatus) => {
     setCarregando(true);
@@ -50,6 +53,15 @@ export default function AdminEstudantes() {
     const id = setTimeout(() => carregar(busca, status), 350);
     return () => clearTimeout(id);
   }, [busca, status, carregar]);
+
+  async function verComprovante(estudante) {
+    setErro('');
+    try {
+      await abrirArquivoProtegido(`/admin/estudantes/${estudante.perfilId}/comprovante`);
+    } catch (e) {
+      setErro(mensagemDeErro(e, 'Não foi possível abrir o comprovante.'));
+    }
+  }
 
   return (
     <div className="pagina__conteudo" style={{ maxWidth: 1180 }}>
@@ -79,8 +91,33 @@ export default function AdminEstudantes() {
 
       {erro ? (
         <div className="aviso aviso-erro" role="alert">
-          {erro}
+          <span>{erro}</span>
         </div>
+      ) : null}
+      {aviso ? (
+        <div className="aviso aviso-ok" role="status">
+          <span>{aviso}</span>
+        </div>
+      ) : null}
+
+      {editando ? (
+        <ModalEditarEstudante
+          estudante={editando}
+          aoFechar={() => setEditando(null)}
+          aoSalvar={(resultado) => {
+            setEditando(null);
+            let texto = resultado.mensagem;
+            if (resultado.reemissao?.reemitida) {
+              texto += resultado.email?.enviado
+                ? ' O aluno recebeu a nova carteirinha por e-mail.'
+                : ` A carteirinha foi regerada, mas o e-mail não saiu (${resultado.email?.motivo}).`;
+            } else if (resultado.reemissao?.erro) {
+              texto += ` ATENÇÃO: falha ao reemitir (${resultado.reemissao.erro}).`;
+            }
+            setAviso(texto);
+            carregar(busca, status);
+          }}
+        />
       ) : null}
 
       {carregando ? (
@@ -103,7 +140,8 @@ export default function AdminEstudantes() {
                   <th>Curso</th>
                   <th>Status</th>
                   <th>Validade</th>
-                  <th>Documento</th>
+                  <th>Documentos</th>
+                  <th>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -143,18 +181,40 @@ export default function AdminEstudantes() {
                     </td>
                     <td>{formatarData(e.carteirinha?.dataValidade)}</td>
                     <td>
-                      {e.carteirinha?.arquivoUrl ? (
-                        <a
-                          href={e.carteirinha.arquivoUrl.replace(/-frente\.png$/, '.pdf')}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="btn-texto"
-                        >
-                          Ver PDF
-                        </a>
-                      ) : (
-                        <span style={{ color: 'var(--cinza-300)' }}>--</span>
-                      )}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {e.carteirinha?.arquivoUrl ? (
+                          <a
+                            href={e.carteirinha.arquivoUrl.replace(/-frente\.png$/, '.pdf')}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="btn-texto"
+                            style={{ padding: 0 }}
+                          >
+                            Carteirinha
+                          </a>
+                        ) : null}
+                        {e.temComprovante ? (
+                          <button
+                            type="button"
+                            className="btn-texto"
+                            style={{ padding: 0, border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left' }}
+                            onClick={() => verComprovante(e)}
+                          >
+                            Matrícula
+                          </button>
+                        ) : (
+                          <span style={{ color: 'var(--cinza-500)', fontSize: 13 }}>sem matrícula</span>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="btn btn-contorno btn-sm"
+                        onClick={() => setEditando(e)}
+                      >
+                        Corrigir
+                      </button>
                     </td>
                   </tr>
                 ))}
