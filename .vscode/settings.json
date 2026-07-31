@@ -1,0 +1,23 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
+
+  "files.eol": "\n",
+  // O dotenv ignora a primeira variável se o arquivo tiver BOM. Já quebrou
+  // o NODE_ENV duas vezes neste projeto — não mude isto.
+  "files.encoding": "utf8",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+
+  "[prisma]": { "editor.defaultFormatter": "prisma.prisma" },
+
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/backend/uploads": true,
+    "**/backend/tmp": true,
+    "**/frontend/dist": true
+  },
+
+  "files.associations": { "*.env.example": "dotenv" }
+}

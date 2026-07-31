@@ -1,0 +1,34 @@
+# Dependências
+node_modules/
+
+# Segredos — nunca versionar. Use os .env.example como referência.
+.env
+.env.local
+.env.*.local
+
+# Arquivos gerados em runtime: fotos dos alunos e carteirinhas emitidas.
+# São dados pessoais (LGPD) e binários pesados.
+backend/uploads/
+backend/tmp/
+
+# Build
+frontend/dist/
+frontend/dist-ssr/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Editores (mantemos .vscode versionado de propósito)
+.idea/
+*.suo
+*.sw?
+
+# Configuração de ferramentas de desenvolvimento, local e pessoal
+.claude/

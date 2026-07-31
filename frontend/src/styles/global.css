@@ -1,0 +1,449 @@
+/* ===========================================================================
+   DCE ATITUS - base visual
+   Verde da marca do DCE ATITUS + neutros frios. Tudo em custom properties para
+   o time do DCE conseguir ajustar a identidade sem caçar valor no meio do CSS.
+   =========================================================================== */
+
+:root {
+  --verde-900: #0a2a23;
+  --verde-800: #0f3b31;
+  --verde-700: #17603a;
+  --verde-600: #1b7f4b;
+  --verde-500: #22a05e;
+  --mint-300: #6fd39a;
+  --ambar: #f2b705;
+
+  --grafite: #2b2b2b;
+
+  --cinza-0: #ffffff;
+  --cinza-50: #f6f8f7;
+  --cinza-100: #ecf0ee;
+  --cinza-200: #dce3e0;
+  --cinza-300: #c3cdc9;
+  --cinza-500: #6b7873;
+  --cinza-700: #3a4744;
+  --cinza-900: #14201c;
+
+  --vermelho: #c0392b;
+  --vermelho-fundo: #fdecea;
+  --amarelo: #b7791f;
+  --amarelo-fundo: #fdf6e3;
+  --azul: #1f6feb;
+  --azul-fundo: #eaf2fe;
+
+  --raio-sm: 8px;
+  --raio: 12px;
+  --raio-lg: 18px;
+  --raio-xl: 26px;
+
+  --sombra-sm: 0 1px 3px rgba(16, 40, 34, 0.08);
+  --sombra: 0 4px 16px rgba(16, 40, 34, 0.09);
+  --sombra-lg: 0 12px 38px rgba(16, 40, 34, 0.14);
+
+  --largura-max: 1180px;
+  --sidebar: 268px;
+  --header-h: 74px;
+
+  --fonte: 'Inter', 'Segoe UI', system-ui, -apple-system, Helvetica, Arial, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--fonte);
+  background: var(--cinza-50);
+  color: var(--cinza-900);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--verde-500);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --- utilitários ---------------------------------------------------------- */
+
+.container {
+  width: 100%;
+  max-width: var(--largura-max);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.apenas-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* --- botões --------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  padding: 12px 26px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s, border-color 0.16s, color 0.16s, transform 0.12s,
+    box-shadow 0.16s;
+  background: none;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.btn-primario {
+  background: var(--verde-600);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(27, 127, 75, 0.28);
+}
+.btn-primario:not(:disabled):hover {
+  background: var(--verde-500);
+}
+
+.btn-escuro {
+  background: var(--verde-800);
+  color: #fff;
+}
+.btn-escuro:not(:disabled):hover {
+  background: var(--verde-700);
+}
+
+.btn-contorno {
+  border-color: var(--cinza-300);
+  color: var(--cinza-700);
+  background: #fff;
+}
+.btn-contorno:not(:disabled):hover {
+  border-color: var(--verde-600);
+  color: var(--verde-700);
+}
+
+.btn-contorno-claro {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+.btn-contorno-claro:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: #fff;
+}
+
+.btn-perigo {
+  background: var(--vermelho);
+  color: #fff;
+}
+.btn-perigo:not(:disabled):hover {
+  filter: brightness(1.08);
+}
+
+.btn-texto {
+  padding: 8px 4px;
+  color: var(--verde-700);
+  font-weight: 600;
+}
+.btn-texto:hover {
+  text-decoration: underline;
+}
+
+.btn-bloco {
+  width: 100%;
+}
+
+.btn-sm {
+  padding: 9px 18px;
+  font-size: 14px;
+}
+
+/* --- cartões e superfícies ------------------------------------------------ */
+
+.cartao {
+  background: #fff;
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--raio-lg);
+  box-shadow: var(--sombra-sm);
+}
+
+.cartao-corpo {
+  padding: 28px;
+}
+
+/* --- formulários ---------------------------------------------------------- */
+
+.campo {
+  margin-bottom: 18px;
+}
+
+.campo label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cinza-700);
+  margin-bottom: 7px;
+}
+
+.campo .obrigatorio {
+  color: var(--vermelho);
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--cinza-200);
+  border-radius: var(--raio);
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus {
+  outline: none;
+  border-color: var(--verde-600);
+  box-shadow: 0 0 0 3px rgba(27, 127, 75, 0.14);
+}
+
+.campo input[aria-invalid='true'],
+.campo select[aria-invalid='true'] {
+  border-color: var(--vermelho);
+}
+
+/* Também vale fora de um .campo (avisos soltos abaixo de um botão, por ex.). */
+.ajuda {
+  font-size: 13px;
+  color: var(--cinza-500);
+  margin-top: 6px;
+}
+
+.campo .erro {
+  font-size: 13px;
+  color: var(--vermelho);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.grade-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+}
+
+/* --- avisos --------------------------------------------------------------- */
+
+.aviso {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: var(--raio);
+  font-size: 14.5px;
+  line-height: 1.55;
+  margin-bottom: 18px;
+  border: 1px solid transparent;
+}
+
+.aviso-erro {
+  background: var(--vermelho-fundo);
+  color: #8c281c;
+  border-color: #f5c6c0;
+}
+.aviso-ok {
+  background: #e8f6ee;
+  color: #14663c;
+  border-color: #b6e2c8;
+}
+.aviso-atencao {
+  background: var(--amarelo-fundo);
+  color: #8a5b09;
+  border-color: #f0dfae;
+}
+.aviso-info {
+  background: var(--azul-fundo);
+  color: #17458f;
+  border-color: #c3dafb;
+}
+
+/* --- selos de status ------------------------------------------------------ */
+
+.selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.selo::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.selo-aguardando_pagamento {
+  background: var(--amarelo-fundo);
+  color: var(--amarelo);
+}
+.selo-pagamento_em_analise {
+  background: var(--azul-fundo);
+  color: var(--azul);
+}
+.selo-aprovada {
+  background: #e8f6ee;
+  color: var(--verde-700);
+}
+.selo-rejeitada {
+  background: var(--vermelho-fundo);
+  color: var(--vermelho);
+}
+
+/* --- tabelas -------------------------------------------------------------- */
+
+.tabela-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+  min-width: 720px;
+}
+
+table.tabela th {
+  text-align: left;
+  font-size: 12px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--cinza-500);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--cinza-200);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+table.tabela td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--cinza-100);
+  vertical-align: middle;
+}
+
+table.tabela tbody tr:hover {
+  background: var(--cinza-50);
+}
+
+/* --- estados -------------------------------------------------------------- */
+
+.carregando-tela {
+  min-height: 60vh;
+  display: grid;
+  place-items: center;
+  gap: 14px;
+  color: var(--cinza-500);
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid var(--cinza-200);
+  border-top-color: var(--verde-600);
+  border-radius: 50%;
+  animation: girar 0.7s linear infinite;
+}
+
+.spinner-sm {
+  width: 17px;
+  height: 17px;
+  border-width: 2px;
+  border-top-color: currentColor;
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vazio {
+  text-align: center;
+  padding: 56px 24px;
+  color: var(--cinza-500);
+}
+
+.vazio h3 {
+  color: var(--cinza-700);
+  margin-bottom: 6px;
+  font-size: 17px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .grade-form {
+    grid-template-columns: 1fr;
+  }
+  .cartao-corpo {
+    padding: 20px;
+  }
+  .container {
+    padding: 0 16px;
+  }
+}

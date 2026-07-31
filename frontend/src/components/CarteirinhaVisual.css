@@ -1,0 +1,195 @@
+/* Réplica em tela da frente da carteirinha.
+   Tudo dimensionado em cqw (1cqw = 1% da largura do cartão), com os mesmos
+   valores em px do template do Puppeteer divididos por 10,11.
+   Card de referência: 1011 x 638 px. */
+
+.cv-container {
+  container-type: inline-size;
+  width: 100%;
+  max-width: 620px;
+}
+
+.cv {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1011 / 638;
+  background: var(--verde-800);
+  border-radius: 3.36cqw;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  box-shadow: var(--sombra-lg);
+  font-family: 'Inter', var(--fonte);
+}
+
+.cv__tracos {
+  position: absolute;
+  pointer-events: none;
+}
+.cv__tracos path {
+  stroke: rgba(255, 255, 255, 0.32);
+  stroke-width: 2;
+  fill: none;
+}
+.cv__tracos--topo {
+  top: 0;
+  right: 0;
+  width: 29.7cqw;
+  height: 14.8cqw;
+}
+.cv__tracos--rodape {
+  bottom: 0;
+  right: 5.9cqw;
+  width: 33.6cqw;
+  height: 10.9cqw;
+}
+
+/* --- logo ---------------------------------------------------------------- */
+
+.cv__logo {
+  display: block;
+  line-height: 1;
+}
+.cv__logo-sigla {
+  display: block;
+  font-family: 'Montserrat', 'Arial Black', sans-serif;
+  font-weight: 800;
+  font-size: 6.13cqw;
+  letter-spacing: -0.02em;
+}
+.cv__logo-regua {
+  display: block;
+  height: 0.4cqw;
+  background: #fff;
+  margin: 0.69cqw 0 0.49cqw;
+}
+.cv__logo-inst {
+  display: block;
+  font-family: 'Montserrat', 'Arial Black', sans-serif;
+  font-weight: 800;
+  font-size: 2.27cqw;
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-indent: 0.3em;
+}
+
+/* --- topo ---------------------------------------------------------------- */
+
+.cv__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+  padding: 2.57cqw 4.35cqw 2.18cqw;
+  position: relative;
+  z-index: 2;
+}
+.cv__titulo {
+  font-size: 3.07cqw;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: right;
+}
+
+/* --- miolo --------------------------------------------------------------- */
+
+.cv__miolo {
+  flex: 1;
+  background: var(--grafite);
+  display: flex;
+  align-items: center;
+  gap: 3.76cqw;
+  padding: 2.57cqw 4.35cqw;
+  min-height: 0;
+}
+
+.cv__foto {
+  width: 21.96cqw;
+  height: 29.28cqw;
+  flex-shrink: 0;
+  border-radius: 1.19cqw;
+  border: 0.4cqw solid #fff;
+  object-fit: cover;
+  background: #d8dbd9;
+}
+.cv__foto--vazia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b8f8d;
+  font-size: 1.68cqw;
+  text-align: center;
+}
+
+.cv__dados {
+  flex: 1;
+  min-width: 0;
+}
+
+.cv__nome {
+  font-size: 3.26cqw;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.88cqw;
+  line-height: 1.12;
+  overflow-wrap: break-word;
+}
+.cv__nome--sm {
+  font-size: 2.67cqw;
+}
+.cv__nome--xs {
+  font-size: 2.27cqw;
+}
+
+.cv__campo {
+  font-size: 2.08cqw;
+  line-height: 1.62;
+  color: #f2f4f3;
+}
+.cv__campo strong {
+  font-weight: 700;
+  color: #fff;
+}
+
+.cv__qr {
+  width: 21.17cqw;
+  height: 21.17cqw;
+  flex-shrink: 0;
+  border-radius: 1.39cqw;
+  border: 0.3cqw dashed rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 1.58cqw;
+  line-height: 1.4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5cqw;
+}
+
+/* --- rodapé -------------------------------------------------------------- */
+
+.cv__rodape {
+  display: flex;
+  align-items: center;
+  gap: 2.57cqw;
+  padding: 1.58cqw 4.35cqw 2.18cqw;
+  position: relative;
+  z-index: 2;
+}
+.cv__ano {
+  font-size: 5.24cqw;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.cv__divisor {
+  width: 0.2cqw;
+  height: 3.76cqw;
+  background: rgba(255, 255, 255, 0.55);
+}
+.cv__validade {
+  font-size: 2.18cqw;
+  color: #e8ecea;
+}

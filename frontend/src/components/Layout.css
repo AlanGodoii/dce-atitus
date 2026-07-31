@@ -1,0 +1,217 @@
+.layout {
+  min-height: 100vh;
+  background: var(--cinza-50);
+}
+
+/* --- sidebar -------------------------------------------------------------- */
+
+.layout__sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar);
+  background: #fff;
+  border-right: 1px solid var(--cinza-200);
+  display: flex;
+  flex-direction: column;
+  z-index: 40;
+}
+
+.layout__marca {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 22px 20px;
+  border-bottom: 1px solid var(--cinza-100);
+}
+
+.layout__marca-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.layout__marca-texto strong {
+  font-size: 14.5px;
+  color: var(--cinza-900);
+  line-height: 1.25;
+}
+.layout__marca-texto span {
+  font-size: 12.5px;
+  color: var(--cinza-500);
+}
+
+.layout__nav {
+  flex: 1;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.layout__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--raio);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--cinza-700);
+  border: none;
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.layout__link:hover {
+  background: var(--cinza-50);
+  color: var(--verde-700);
+}
+
+.layout__link--ativo {
+  background: var(--verde-800);
+  color: #fff;
+}
+.layout__link--ativo:hover {
+  background: var(--verde-800);
+  color: #fff;
+}
+
+.layout__icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.layout__icone svg {
+  width: 20px;
+  height: 20px;
+}
+
+.layout__rodape {
+  border-top: 1px solid var(--cinza-100);
+  padding: 14px;
+}
+
+.layout__usuario {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 6px 10px 12px;
+  min-width: 0;
+}
+
+.layout__avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--verde-800);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.layout__usuario-texto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.layout__usuario-texto strong {
+  font-size: 14px;
+  color: var(--cinza-900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.layout__usuario-texto span {
+  font-size: 12.5px;
+  color: var(--cinza-500);
+}
+
+.layout__sair {
+  color: var(--cinza-500);
+}
+.layout__sair:hover {
+  background: var(--vermelho-fundo);
+  color: var(--vermelho);
+}
+
+/* --- conteúdo ------------------------------------------------------------- */
+
+.layout__conteudo {
+  margin-left: var(--sidebar);
+  padding: 34px 38px 60px;
+  min-height: 100vh;
+}
+
+/* --- topo mobile ---------------------------------------------------------- */
+
+.layout__topo-mobile {
+  display: none;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--cinza-200);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.layout__hamburguer {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--cinza-200);
+  border-radius: var(--raio-sm);
+  background: #fff;
+  display: grid;
+  place-content: center;
+  gap: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.layout__hamburguer span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--cinza-700);
+  border-radius: 2px;
+}
+
+.layout__overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 42, 35, 0.45);
+  border: none;
+  z-index: 35;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .layout__topo-mobile {
+    display: flex;
+  }
+  .layout__overlay {
+    display: block;
+  }
+  .layout__sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    box-shadow: var(--sombra-lg);
+  }
+  .layout__sidebar--aberta {
+    transform: translateX(0);
+  }
+  .layout__conteudo {
+    margin-left: 0;
+    padding: 22px 16px 48px;
+    min-height: auto;
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "name": "dce-atitus-backend",
+  "version": "1.0.0",
+  "description": "API da Carteirinha Estudantil Digital do DCE ATITUS",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio",
+    "seed": "node src/prisma/seed.js",
+    "seed:demo": "node seed-demo.mjs",
+    "limpar:teste": "node limpar-dados-teste.mjs",
+    "preview:carteirinha": "node preview-carteirinha.mjs",
+    "test:email": "node testar-email.mjs",
+    "test:smoke": "node tests/auth.smoke.mjs && node tests/verificacao.smoke.mjs && node tests/perfil.smoke.mjs && node tests/fluxo.smoke.mjs && node tests/busca-admin.smoke.mjs"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.3.1",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.0.1",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^2.2.0",
+    "nodemailer": "^9.0.3",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "puppeteer": "^25.4.0",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.35.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9",
+    "prisma": "^6.3.1"
+  }
+}

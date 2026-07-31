@@ -1,0 +1,146 @@
+// Schema da Carteirinha Estudantil Digital - DCE ATITUS
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  admin
+  estudante
+}
+
+enum StatusCarteirinha {
+  aguardando_pagamento
+  pagamento_em_analise
+  aprovada
+  rejeitada
+}
+
+enum StatusPagamento {
+  pendente
+  confirmado
+  rejeitado
+}
+
+/// Impresso no campo "Nivel" da frente da carteirinha.
+enum NivelEnsino {
+  graduacao
+  pos_graduacao
+  mestrado
+  doutorado
+  tecnico
+}
+
+// ---------------------------------------------------------------------------
+// Modelos
+// ---------------------------------------------------------------------------
+
+model Usuario {
+  id        String   @id @default(uuid()) @db.Uuid
+  nome      String   @db.VarChar(150)
+  email     String   @unique @db.VarChar(180)
+  senhaHash String?  @map("senha_hash") @db.VarChar(255)
+  googleId  String?  @unique @map("google_id") @db.VarChar(64)
+  role      Role     @default(estudante)
+  whatsapp  String?  @db.VarChar(20)
+  criadoEm  DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  /// Nulo enquanto o dono da caixa nao clicar no link (ou digitar o codigo)
+  /// que mandamos. Contas vindas do Google ja nascem verificadas.
+  emailVerificadoEm DateTime? @map("email_verificado_em") @db.Timestamptz(6)
+
+  perfil                PerfilEstudante?
+  pagamentosConfirmados Pagamento[]        @relation("PagamentoConfirmadoPor")
+  tokensEmail           TokenVerificacao[]
+
+  @@map("usuarios")
+}
+
+model TokenVerificacao {
+  id        String @id @default(uuid()) @db.Uuid
+  usuarioId String @map("usuario_id") @db.Uuid
+
+  /// Guardamos o SHA-256 do token, nunca o token em si: se o banco vazar,
+  /// ninguem consegue verificar contas alheias com o que estiver la dentro.
+  tokenHash String @unique @map("token_hash") @db.Char(64)
+
+  /// Alternativa ao link, para quem abre o e-mail no celular e o site no PC.
+  codigo String @db.Char(6)
+
+  expiraEm DateTime  @map("expira_em") @db.Timestamptz(6)
+  usadoEm  DateTime? @map("usado_em") @db.Timestamptz(6)
+  criadoEm DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+  @@map("tokens_verificacao_email")
+}
+
+model PerfilEstudante {
+  id             String   @id @default(uuid()) @db.Uuid
+  usuarioId      String   @unique @map("usuario_id") @db.Uuid
+  fotoUrl        String?  @map("foto_url") @db.VarChar(500)
+  cpf            String   @unique @db.Char(11)
+  dataNascimento DateTime    @map("data_nascimento") @db.Date
+  matricula      String      @db.VarChar(30)
+  curso          String      @db.VarChar(120)
+  nivel          NivelEnsino @default(graduacao)
+  criadoEm       DateTime @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm   DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  usuario      Usuario       @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  carteirinhas Carteirinha[]
+
+  @@map("perfis_estudante")
+}
+
+model Carteirinha {
+  id     String            @id @default(uuid()) @db.Uuid
+  perfilId String          @map("perfil_id") @db.Uuid
+  status StatusCarteirinha @default(aguardando_pagamento)
+
+  // Preenchido somente na aprovacao do pagamento. Ate la o QR nao existe.
+  qrCodeUuid String? @unique @map("qr_code_uuid") @db.Uuid
+
+  arquivoUrl      String?   @map("arquivo_url") @db.VarChar(500)
+  arquivoVersoUrl String?   @map("arquivo_verso_url") @db.VarChar(500)
+  dataEmissao     DateTime? @map("data_emissao") @db.Timestamptz(6)
+  dataValidade    DateTime? @map("data_validade") @db.Date
+  criadoEm        DateTime  @default(now()) @map("criado_em") @db.Timestamptz(6)
+  atualizadoEm    DateTime  @updatedAt @map("atualizado_em") @db.Timestamptz(6)
+
+  perfil     PerfilEstudante @relation(fields: [perfilId], references: [id], onDelete: Cascade)
+  pagamentos Pagamento[]
+
+  @@index([perfilId])
+  @@index([status])
+  @@map("carteirinhas")
+}
+
+model Pagamento {
+  id              String          @id @default(uuid()) @db.Uuid
+  carteirinhaId   String          @map("carteirinha_id") @db.Uuid
+  comprovanteInfo String?         @map("comprovante_info") @db.Text
+  status          StatusPagamento @default(pendente)
+  confirmadoPorId String?         @map("confirmado_por") @db.Uuid
+  confirmadoEm    DateTime?       @map("confirmado_em") @db.Timestamptz(6)
+  criadoEm        DateTime        @default(now()) @map("criado_em") @db.Timestamptz(6)
+
+  carteirinha   Carteirinha @relation(fields: [carteirinhaId], references: [id], onDelete: Cascade)
+  confirmadoPor Usuario?    @relation("PagamentoConfirmadoPor", fields: [confirmadoPorId], references: [id], onDelete: SetNull)
+
+  @@index([carteirinhaId])
+  @@index([status])
+  @@map("pagamentos")
+}

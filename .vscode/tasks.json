@@ -1,0 +1,63 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Backend (API)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "presentation": { "group": "servidores", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Frontend (site)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/frontend" },
+      "isBackground": true,
+      "presentation": { "group": "servidores", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Subir tudo",
+      "dependsOn": ["Backend (API)", "Frontend (site)"],
+      "dependsOrder": "parallel",
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "Rodar testes (desliga o e-mail antes!)",
+      "type": "shell",
+      "command": "npm run test:smoke",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "presentation": { "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Limpar contas de teste",
+      "type": "shell",
+      "command": "npm run limpar:teste -- --apagar",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "presentation": { "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Prisma Studio (ver o banco)",
+      "type": "shell",
+      "command": "npm run prisma:studio",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "isBackground": true,
+      "presentation": { "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Preview da carteirinha",
+      "type": "shell",
+      "command": "npm run preview:carteirinha",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "presentation": { "panel": "dedicated" },
+      "problemMatcher": []
+    }
+  ]
+}
