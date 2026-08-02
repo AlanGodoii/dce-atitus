@@ -45,18 +45,18 @@ checar(
 );
 
 console.log('\n== validacao de cadastro ==');
-r = await req('POST', '/auth/register', { nome: 'Ana', email: 'nao-e-email', senha: '123' });
+r = await req('POST', '/auth/register', { aceiteTermos: true, nome: 'Ana', email: 'nao-e-email', senha: '123' });
 checar('rejeita email malformado / senha fraca / nome sem sobrenome', r.status === 422);
 console.log('       ->', JSON.stringify(r.dados.detalhes));
 
-r = await req('POST', '/auth/register', {
+r = await req('POST', '/auth/register', { aceiteTermos: true,
   nome: 'Ana Souza',
   email: 'ana@dominio-que-nao-existe-xyzq.com.br',
   senha: 'senha1234',
 });
 checar('rejeita dominio de email inexistente (MX)', r.status === 422, JSON.stringify(r.dados));
 
-r = await req('POST', '/auth/register', {
+r = await req('POST', '/auth/register', { aceiteTermos: true,
   nome: 'Ana Souza',
   email: 'ana@hotmail.com',
   senha: 'senhasemnumero',
@@ -64,7 +64,7 @@ r = await req('POST', '/auth/register', {
 checar('exige letra + numero na senha', r.status === 422);
 
 console.log('\n== cadastro e login ==');
-r = await req('POST', '/auth/register', {
+r = await req('POST', '/auth/register', { aceiteTermos: true,
   nome: 'Aluno De Teste',
   email,
   senha: 'senha1234',
@@ -75,7 +75,7 @@ checar('normaliza whatsapp para E.164', r.dados?.usuario?.whatsapp === '55549923
 checar('nao vaza senha_hash na resposta', !JSON.stringify(r.dados).includes('senhaHash'));
 const tokenAluno = r.dados.token;
 
-r = await req('POST', '/auth/register', { nome: 'Outro Nome', email, senha: 'senha1234' });
+r = await req('POST', '/auth/register', { aceiteTermos: true, nome: 'Outro Nome', email, senha: 'senha1234' });
 checar('bloqueia email duplicado (409)', r.status === 409, JSON.stringify(r.dados));
 
 r = await req('POST', '/auth/login', { email, senha: 'senhaErrada1' });
@@ -86,6 +86,29 @@ checar('login com email inexistente devolve a MESMA mensagem', r.status === 401 
 
 r = await req('POST', '/auth/login', { email: email.toUpperCase(), senha: 'senha1234' });
 checar('login e case-insensitive no email', r.status === 200 && !!r.dados.token, JSON.stringify(r.dados));
+
+console.log('\n== aceite dos termos ==');
+const emailTermos = `termos.${Date.now()}@gmail.com`;
+const semAceite = { nome: 'Tais Termos', email: emailTermos, senha: 'senha1234' };
+
+r = await req('POST', '/auth/register', semAceite);
+checar('cadastro SEM aceitar os termos e recusado (422)', r.status === 422, JSON.stringify(r.dados.detalhes));
+
+r = await req('POST', '/auth/register', { ...semAceite, aceiteTermos: false });
+checar('aceiteTermos=false tambem e recusado', r.status === 422);
+
+r = await req('POST', '/auth/register', { ...semAceite, aceiteTermos: 'sim' });
+checar('aceiteTermos precisa ser booleano', r.status === 422);
+
+r = await req('POST', '/auth/register', { ...semAceite, aceiteTermos: true });
+checar('com aceite, o cadastro passa (201)', r.status === 201, JSON.stringify(r.dados).slice(0, 120));
+
+const cfgTermos = await req('GET', '/config-publica');
+checar(
+  'config-publica expoe a versao dos termos',
+  Boolean(cfgTermos.dados?.termos?.versao),
+  JSON.stringify(cfgTermos.dados?.termos),
+);
 
 console.log('\n== rotas protegidas ==');
 r = await req('GET', '/auth/me');

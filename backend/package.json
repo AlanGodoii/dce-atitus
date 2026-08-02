@@ -17,7 +17,7 @@
     "limpar:estudantes": "node limpar-estudantes.mjs",
     "preview:carteirinha": "node preview-carteirinha.mjs",
     "test:email": "node testar-email.mjs",
-    "test:smoke": "node tests/auth.smoke.mjs && node tests/verificacao.smoke.mjs && node tests/perfil.smoke.mjs && node tests/comprovante.smoke.mjs && node tests/fluxo.smoke.mjs && node tests/busca-admin.smoke.mjs && node tests/edicao-admin.smoke.mjs"
+    "test:smoke": "node tests/auth.smoke.mjs && node tests/verificacao.smoke.mjs && node tests/senha.smoke.mjs && node tests/perfil.smoke.mjs && node tests/comprovante.smoke.mjs && node tests/fluxo.smoke.mjs && node tests/busca-admin.smoke.mjs && node tests/edicao-admin.smoke.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",

@@ -1,7 +1,7 @@
 # Carteirinha Estudantil Digital — DCE ATITUS
 
 Sistema de emissão e gestão da Carteira de Identificação Estudantil (CIE) do
-Diretório Central de Estudantes da ATITUS.
+Diretório Central Matheus Teixeira, o DCE da ATITUS.
 
 O estudante cria a conta, confirma o e-mail, preenche o perfil, paga por PIX e
 manda o comprovante no WhatsApp. O DCE confere e aprova no painel; o sistema gera

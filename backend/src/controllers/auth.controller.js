@@ -2,14 +2,29 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '../config/prisma.js';
 import { AppError } from '../utils/AppError.js';
 import { gerarToken } from '../utils/jwt.js';
+import { VERSAO_TERMOS } from '../config/termos.js';
 import {
   MOTIVOS,
   enviarVerificacao,
   verificarPorCodigo,
   verificarPorToken,
 } from '../services/verificacao.service.js';
+import {
+  MOTIVOS as MOTIVOS_SENHA,
+  pedirRedefinicao,
+  redefinirSenha,
+} from '../services/senha.service.js';
 
 const CUSTO_BCRYPT = 12;
+
+/**
+ * IP de quem fez a requisição, para compor a prova do aceite dos termos.
+ * Atrás de proxy (que é como isto vai rodar em produção), o Express só devolve
+ * o IP real com `trust proxy` ligado — ver app.js.
+ */
+function ipDaRequisicao(req) {
+  return (req.ip ?? req.socket?.remoteAddress ?? '').slice(0, 64) || null;
+}
 
 function publico(usuario) {
   return {
@@ -44,6 +59,10 @@ export async function register(req, res) {
       senhaHash: await bcrypt.hash(senha, CUSTO_BCRYPT),
       whatsapp,
       role: 'estudante',
+      // Registro do consentimento: versão, quando e de onde.
+      aceiteTermosVersao: VERSAO_TERMOS,
+      aceiteTermosEm: new Date(),
+      aceiteTermosIp: ipDaRequisicao(req),
     },
   });
 
@@ -125,6 +144,49 @@ export async function verificarEmail(req, res) {
   // Devolve um token novo para quem confirmou pelo link já entrar logado.
   return res.json({
     mensagem: resultado.jaEstava ? 'Seu e-mail já estava confirmado.' : 'E-mail confirmado!',
+    token: gerarToken(resultado.usuario),
+    usuario: publico(resultado.usuario),
+  });
+}
+
+// --- redefinição de senha --------------------------------------------------
+
+export async function esqueciSenha(req, res) {
+  const { email } = req.body;
+  const usuario = await prisma.usuario.findUnique({ where: { email } });
+
+  // Resposta idêntica exista ou não a conta: senão a rota vira um oráculo que
+  // confirma quais e-mails estão cadastrados no sistema.
+  const generica = {
+    mensagem: `Se houver uma conta com ${email}, enviamos um link para criar uma senha nova.`,
+  };
+
+  if (!usuario) return res.json(generica);
+
+  const resultado = await pedirRedefinicao(usuario);
+
+  return res.json({
+    ...generica,
+    enviado: resultado.enviado,
+    ...(resultado.dev ? { dev: resultado.dev } : {}),
+  });
+}
+
+export async function redefinirSenhaController(req, res) {
+  const { token, email, codigo, senha } = req.body;
+
+  const resultado = await redefinirSenha({ token, email, codigo, senha });
+
+  if (!resultado.ok) {
+    throw new AppError(MOTIVOS_SENHA[resultado.motivo] ?? MOTIVOS_SENHA.invalido, 400, {
+      motivo: resultado.motivo,
+    });
+  }
+
+  // Já entra logado: o token novo é emitido depois de senhaAlteradaEm, então
+  // sobrevive à invalidação que acabou de derrubar as outras sessões.
+  return res.json({
+    mensagem: 'Senha alterada. Você já está conectado.',
     token: gerarToken(resultado.usuario),
     usuario: publico(resultado.usuario),
   });

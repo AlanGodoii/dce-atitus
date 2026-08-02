@@ -97,7 +97,22 @@ export default function Login() {
             </div>
 
             <div className="campo">
-              <label htmlFor="senha">Senha</label>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                }}
+              >
+                <label htmlFor="senha">Senha</label>
+                <Link
+                  to={`/esqueci-senha${email ? `?email=${encodeURIComponent(email)}` : ''}`}
+                  style={{ fontSize: 13, color: 'var(--verde-700)', fontWeight: 600 }}
+                >
+                  Esqueci minha senha
+                </Link>
+              </div>
               <input
                 id="senha"
                 type="password"

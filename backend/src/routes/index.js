@@ -6,6 +6,7 @@ import carteirinhaRoutes from './carteirinha.routes.js';
 import adminRoutes from './admin.routes.js';
 import { validarCarteirinha } from '../controllers/validacao.controller.js';
 import { env } from '../config/env.js';
+import { VERSAO_TERMOS, VIGENCIA_TERMOS } from '../config/termos.js';
 import { emailHabilitado } from '../services/email.service.js';
 
 const router = Router();
@@ -59,6 +60,7 @@ router.get('/config-publica', (_req, res) => {
   res.json({
     dce: {
       nome: env.dce.nome,
+      nomeCompleto: env.dce.nomeCompleto,
       instituicao: env.dce.instituicao,
       whatsapp: env.dce.whatsapp,
       email: env.dce.email,
@@ -70,6 +72,7 @@ router.get('/config-publica', (_req, res) => {
       valor: env.dce.valorCarteirinha,
     },
     loginGoogleHabilitado: env.google.habilitado,
+    termos: { versao: VERSAO_TERMOS, vigencia: VIGENCIA_TERMOS },
   });
 });
 

@@ -317,10 +317,10 @@ export function htmlVerso() {
         <div class="verso-titulo">Base Legal</div>
         <p>
           Esta Carteira de Identifica&ccedil;&atilde;o Estudantil (CIE) &eacute; emitida pelo
-          Diret&oacute;rio Central de Estudantes da ATITUS, atendendo &agrave;
-          Lei Federal n&ordm; 12.933/2013, art. 1&ordm;, &sect; 2&ordm;, que garante a
-          meia-entrada em eventos art&iacute;stico-culturais e esportivos a
-          estudantes matriculados em institui&ccedil;&otilde;es de ensino.
+          ${escaparHtml(env.dce.nomeCompleto)}, da ${escaparHtml(env.dce.instituicao)},
+          atendendo &agrave; Lei Federal n&ordm; 12.933/2013, art. 1&ordm;, &sect; 2&ordm;,
+          que garante a meia-entrada em eventos art&iacute;stico-culturais e
+          esportivos a estudantes matriculados em institui&ccedil;&otilde;es de ensino.
         </p>
         <p>
           O ${escaparHtml(env.dce.nome)} confirma a condi&ccedil;&atilde;o de estudante para

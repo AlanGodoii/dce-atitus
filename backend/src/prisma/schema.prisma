@@ -32,6 +32,14 @@ enum StatusPagamento {
   rejeitado
 }
 
+/// Os dois usos de token que mandamos por e-mail. Compartilham a mesma tabela
+/// porque a mecanica e identica (hash, expiracao, uso unico), mas o prazo de
+/// validade e diferente: redefinir senha da acesso a conta, entao expira antes.
+enum TipoToken {
+  confirmacao_email
+  redefinicao_senha
+}
+
 /// Impresso no campo "Nivel" da frente da carteirinha.
 enum NivelEnsino {
   graduacao
@@ -59,6 +67,18 @@ model Usuario {
   /// que mandamos. Contas vindas do Google ja nascem verificadas.
   emailVerificadoEm DateTime? @map("email_verificado_em") @db.Timestamptz(6)
 
+  /// Marca o momento da ultima troca de senha. Tokens JWT emitidos ANTES disso
+  /// deixam de valer — e o que derruba as outras sessoes quando alguem redefine
+  /// a senha por suspeitar que a conta foi acessada por terceiros.
+  senhaAlteradaEm DateTime? @map("senha_alterada_em") @db.Timestamptz(6)
+
+  /// Aceite dos termos de uso e da politica de privacidade (LGPD art. 8).
+  /// Guardar a VERSAO importa: quando o texto mudar, sabemos quem aceitou o que.
+  /// O IP e a data compoem a prova de que o consentimento foi dado.
+  aceiteTermosVersao String?   @map("aceite_termos_versao") @db.VarChar(20)
+  aceiteTermosEm     DateTime? @map("aceite_termos_em") @db.Timestamptz(6)
+  aceiteTermosIp     String?   @map("aceite_termos_ip") @db.VarChar(64)
+
   perfil                PerfilEstudante?
   pagamentosConfirmados Pagamento[]        @relation("PagamentoConfirmadoPor")
   tokensEmail           TokenVerificacao[]
@@ -67,8 +87,9 @@ model Usuario {
 }
 
 model TokenVerificacao {
-  id        String @id @default(uuid()) @db.Uuid
-  usuarioId String @map("usuario_id") @db.Uuid
+  id        String    @id @default(uuid()) @db.Uuid
+  usuarioId String    @map("usuario_id") @db.Uuid
+  tipo      TipoToken @default(confirmacao_email)
 
   /// Guardamos o SHA-256 do token, nunca o token em si: se o banco vazar,
   /// ninguem consegue verificar contas alheias com o que estiver la dentro.
@@ -83,7 +104,7 @@ model TokenVerificacao {
 
   usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
-  @@index([usuarioId])
+  @@index([usuarioId, tipo])
   @@map("tokens_verificacao_email")
 }
 

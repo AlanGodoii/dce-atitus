@@ -165,6 +165,33 @@
   background: var(--cinza-200);
 }
 
+.aceite {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 4px 0 18px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--cinza-700);
+  cursor: pointer;
+}
+
+.aceite input {
+  width: auto;
+  margin-top: 3px;
+  flex-shrink: 0;
+  /* Alvo de toque decente no celular. */
+  min-width: 17px;
+  min-height: 17px;
+  accent-color: var(--verde-600);
+}
+
+.aceite a {
+  color: var(--verde-700);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 .auth__rodape {
   margin-top: 22px;
   text-align: center;

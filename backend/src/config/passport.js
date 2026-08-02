@@ -1,6 +1,7 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { prisma } from './prisma.js';
+import { VERSAO_TERMOS } from './termos.js';
 import { env } from './env.js';
 import { normalizarEmail } from '../utils/email.js';
 
@@ -56,6 +57,11 @@ if (env.google.habilitado) {
               googleId: profile.id,
               role: 'estudante',
               emailVerificadoEm: new Date(),
+              // Quem entra pelo Google nao passa pelo formulario com a caixa de
+              // aceite, entao o aviso fica ao lado do botao ("ao continuar,
+              // voce aceita..."). Sem IP porque a estrategia nao recebe o req.
+              aceiteTermosVersao: VERSAO_TERMOS,
+              aceiteTermosEm: new Date(),
             },
           });
           return done(null, novo);

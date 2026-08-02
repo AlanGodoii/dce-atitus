@@ -32,10 +32,24 @@ export async function requireAuth(req, _res, next) {
 
     const usuario = await prisma.usuario.findUnique({
       where: { id: payload.sub },
-      select: { id: true, nome: true, email: true, role: true, whatsapp: true },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        role: true,
+        whatsapp: true,
+        senhaAlteradaEm: true,
+      },
     });
 
     if (!usuario) throw AppError.naoAutorizado('Usuário do token não existe mais.');
+
+    // Token emitido antes da ultima troca de senha nao vale mais. E o que faz a
+    // redefinicao expulsar quem estiver logado em outro aparelho — inclusive
+    // alguem que tenha invadido a conta. O `iat` do JWT vem em segundos.
+    if (usuario.senhaAlteradaEm && payload.iat * 1000 < usuario.senhaAlteradaEm.getTime()) {
+      throw AppError.naoAutorizado('Sua senha foi alterada. Entre novamente.');
+    }
 
     req.usuario = usuario;
     next();

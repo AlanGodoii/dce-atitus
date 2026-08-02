@@ -166,6 +166,51 @@ export async function enviarConfirmacaoEmail({ usuario, link, codigo, horas }) {
   });
 }
 
+export async function enviarRedefinicaoSenha({ usuario, link, codigo, horas }) {
+  const html = layout(
+    'Redefinir sua senha',
+    `
+    ${paragrafo(`Olá, ${usuario.nome.split(' ')[0]}. Recebemos um pedido para trocar a senha da sua conta no DCE ATITUS.`)}
+    <p style="margin:26px 0;">
+      <a href="${link}" style="display:inline-block;background:${VERDE};color:#fff;text-decoration:none;padding:14px 30px;border-radius:8px;font-size:15px;font-weight:600;">Criar uma senha nova</a>
+    </p>
+    ${paragrafo('Ou digite este código no site:')}
+    <p style="margin:0 0 18px;font-size:32px;font-weight:800;letter-spacing:8px;color:${VERDE};font-family:monospace;">${codigo}</p>
+    ${paragrafo(`<span style="color:#6b7873;font-size:13px;">O link vale por ${horas} hora${horas > 1 ? 's' : ''}. <strong>Se não foi você que pediu, ignore este e-mail</strong> — sua senha atual continua valendo e ninguém consegue entrar sem este link.</span>`)}`,
+  );
+
+  return enviarEmail({
+    para: usuario.email,
+    assunto: `Redefinir sua senha — código ${codigo}`,
+    html,
+    texto:
+      `Pedido de troca de senha no DCE ATITUS.\n\nLink: ${link}\nCódigo: ${codigo}\n\n` +
+      `Vale por ${horas}h. Se não foi você, ignore — sua senha atual continua valendo.`,
+  });
+}
+
+/** Aviso depois da troca: é o que permite a pessoa reagir a um acesso indevido. */
+export async function enviarSenhaAlterada({ usuario }) {
+  const quando = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+
+  const html = layout(
+    'Sua senha foi alterada',
+    `
+    ${paragrafo(`Olá, ${usuario.nome.split(' ')[0]}. A senha da sua conta no DCE ATITUS foi trocada em <strong>${quando}</strong>.`)}
+    ${paragrafo('Todas as sessões abertas em outros aparelhos foram encerradas.')}
+    ${paragrafo(`<strong>Não foi você?</strong> Fale com o DCE imediatamente pelo WhatsApp ou respondendo este e-mail.`)}`,
+  );
+
+  return enviarEmail({
+    para: usuario.email,
+    assunto: 'Sua senha do DCE ATITUS foi alterada',
+    html,
+    texto:
+      `A senha da sua conta no DCE ATITUS foi trocada em ${quando}. ` +
+      'As sessões em outros aparelhos foram encerradas. Se não foi você, fale com o DCE.',
+  });
+}
+
 export async function enviarPagamentoRejeitado({ usuario, motivo }) {
   const html = layout(
     'Não conseguimos confirmar seu pagamento',

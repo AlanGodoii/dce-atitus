@@ -59,7 +59,7 @@ function gerarCpf() {
 
 /** Cria a conta e confirma o e-mail usando o token que a API devolve em dev. */
 async function registrarVerificado(dados) {
-  const r = await req('POST', '/auth/register', dados);
+  const r = await req('POST', '/auth/register', { aceiteTermos: true, ...dados });
   if (r.status !== 201) return r;
   const tokenVerificacao = r.dados.verificacao?.dev?.link?.split('token=')[1];
   if (!tokenVerificacao) return r;

@@ -41,7 +41,16 @@ const whatsappOpcional = z
     message: 'WhatsApp inválido. Use DDD + número, ex: (54) 99999-9999.',
   });
 
+// Aceite explicito: o padrao tem que ser "nao aceito", e o cadastro so passa se
+// a pessoa marcar. Caixa pre-marcada nao vale como consentimento (LGPD art. 8).
+const aceiteTermos = z
+  .boolean({ required_error: 'É preciso aceitar os termos de uso.' })
+  .refine((v) => v === true, {
+    message: 'É preciso aceitar os termos de uso e a política de privacidade.',
+  });
+
 export const registerSchema = z.object({
+  aceiteTermos,
   nome: z
     .string({ required_error: 'Informe seu nome completo.' })
     .trim()
@@ -74,3 +83,21 @@ export const verificarSchema = z
   });
 
 export const reenviarVerificacaoSchema = z.object({ email: emailBase });
+
+export const esqueciSenhaSchema = z.object({ email: emailBase });
+
+export const redefinirSenhaSchema = z
+  .object({
+    token: z.string().trim().length(64, 'Link de redefinição inválido.').optional(),
+    email: emailBase.optional(),
+    codigo: z
+      .string()
+      .trim()
+      .transform((v) => v.replace(/\D/g, ''))
+      .refine((v) => v.length === 6, { message: 'O código tem 6 dígitos.' })
+      .optional(),
+    senha,
+  })
+  .refine((d) => Boolean(d.token) || Boolean(d.email && d.codigo), {
+    message: 'Informe o código de 6 dígitos junto com o seu e-mail.',
+  });

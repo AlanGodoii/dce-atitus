@@ -105,6 +105,22 @@ for (const u of estudantes) {
   }
 }
 
+// Contas que NAO parecem ter vindo dos testes automatizados. Sao as que doem
+// perder: cadastros reais feitos a mao para experimentar o sistema.
+const PADRAO_TESTE = /^([a-z.]+\.\d{10,}|teste\.alan\.\d{10,})@gmail\.com$|^\d{10,}\+/;
+const reais = estudantes.filter(
+  (u) => !PADRAO_TESTE.test(u.email) && !u.email.endsWith('.demo@gmail.com'),
+);
+
+if (reais.length > 0) {
+  console.log(`\n  ATENCAO: ${reais.length} destes NAO parecem cadastros de teste:\n`);
+  for (const u of reais) console.log(`    ${u.email}`);
+  console.log(
+    '\n  Para apagar so o lixo dos testes e preservar estes, use:\n' +
+      '    npm run limpar:teste -- --apagar',
+  );
+}
+
 if (!APAGAR) {
   console.log(`\nE ${arquivos.filter(Boolean).length} arquivo(s) em disco.`);
   console.log('\nNada foi apagado. Rode com -- --apagar para confirmar.\n');

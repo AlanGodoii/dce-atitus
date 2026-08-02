@@ -12,6 +12,9 @@ import AdminPagamentos from './pages/AdminPagamentos';
 import AdminEstudantes from './pages/AdminEstudantes';
 import ValidarCarteirinha from './pages/ValidarCarteirinha';
 import VerificarEmail from './pages/VerificarEmail';
+import EsqueciSenha from './pages/EsqueciSenha';
+import RedefinirSenha from './pages/RedefinirSenha';
+import Termos from './pages/Termos';
 
 /** Manda cada perfil para a sua tela inicial. */
 function Inicio() {
@@ -29,6 +32,11 @@ export default function App() {
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/verificar-email" element={<VerificarEmail />} />
+          <Route path="/termos" element={<Termos />} />
+          {/* A política de privacidade está no mesmo documento dos termos. */}
+          <Route path="/privacidade" element={<Termos />} />
+          <Route path="/esqueci-senha" element={<EsqueciSenha />} />
+          <Route path="/redefinir-senha" element={<RedefinirSenha />} />
           <Route path="/validar" element={<ValidarCarteirinha />} />
           <Route path="/validar/:qrCodeUuid" element={<ValidarCarteirinha />} />
 

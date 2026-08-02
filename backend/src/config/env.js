@@ -55,6 +55,9 @@ export const env = {
     tipoChavePix: process.env.DCE_TIPO_CHAVE_PIX ?? 'CNPJ',
     beneficiarioPix: process.env.DCE_BENEFICIARIO_PIX ?? 'Diretorio Central de Estudantes ATITUS',
     valorCarteirinha: Number(process.env.DCE_VALOR_CARTEIRINHA ?? 30),
+    // Nome oficial do diretorio, usado no verso da carteirinha e nos textos do
+    // site. Fonte unica: mudar aqui muda em todo lugar que importa.
+    nomeCompleto: process.env.DCE_NOME_COMPLETO ?? 'Diretório Central Matheus Teixeira',
     whatsapp: process.env.DCE_WHATSAPP ?? '',
     email: process.env.DCE_EMAIL ?? '',
     responsavelNome: process.env.DCE_RESPONSAVEL_NOME ?? '',

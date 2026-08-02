@@ -37,7 +37,7 @@ async function req(metodo, caminho, corpo, token) {
  * confirmação na resposta do cadastro, então dá para fechar o ciclo sem SMTP.
  */
 async function registrarVerificado(dados) {
-  const r = await req('POST', '/auth/register', dados);
+  const r = await req('POST', '/auth/register', { aceiteTermos: true, ...dados });
   if (r.status !== 201) return r;
 
   const tokenVerificacao = r.dados.verificacao?.dev?.link?.split('token=')[1];

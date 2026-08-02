@@ -3,8 +3,10 @@ import rateLimit from 'express-rate-limit';
 import passport from '../config/passport.js';
 import { env } from '../config/env.js';
 import {
+  esqueciSenha,
   login,
   me,
+  redefinirSenhaController,
   register,
   reenviarVerificacao,
   verificarEmail,
@@ -12,7 +14,9 @@ import {
 import { requireAuth } from '../middlewares/auth.middleware.js';
 import { validate } from '../middlewares/validate.middleware.js';
 import {
+  esqueciSenhaSchema,
   loginSchema,
+  redefinirSenhaSchema,
   reenviarVerificacaoSchema,
   registerSchema,
   verificarSchema,
@@ -54,6 +58,16 @@ router.post('/login', limiteAuth, validate(loginSchema), login);
 router.get('/me', requireAuth, me);
 
 router.post('/verificar-email', limiteVerificacao, validate(verificarSchema), verificarEmail);
+
+// Pedir redefinição gasta e-mail e é gatilho fácil de abuso; tentar adivinhar o
+// código precisa ser caro. Por isso os dois passam por limites separados.
+router.post('/esqueci-senha', limiteReenvio, validate(esqueciSenhaSchema), esqueciSenha);
+router.post(
+  '/redefinir-senha',
+  limiteVerificacao,
+  validate(redefinirSenhaSchema),
+  redefinirSenhaController,
+);
 router.post(
   '/reenviar-verificacao',
   limiteReenvio,

@@ -18,8 +18,9 @@ const APAGAR = process.argv.includes('--apagar');
 // Deliberadamente estritos: exigem o timestamp no endereço, para nunca casar
 // com o e-mail de uma pessoa de verdade.
 const PADROES_TESTE = [
-  /^(verif|link|reenvio|fluxo|perfil|outro|rejeita|naoverif|comp|bisb)\.\d{10,}@gmail\.com$/,
+  /^(verif|link|reenvio|fluxo|perfil|outro|rejeita|naoverif|comp|bisb|senha|senha2|senha3|browser|redir|termos)\.\d{10,}@gmail\.com$/,
   /^teste\.alan\.\d{10,}@gmail\.com$/,
+  /^(edicao|bisb\.edicao)\.\d{10,}@gmail\.com$/,
   /^\d{10,}\+.+@/,
   /^alan\.godoicc\+(aluno|rejeitado)\d+@gmail\.com$/,
 ];

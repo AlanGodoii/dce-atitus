@@ -12,6 +12,9 @@ export default function Cadastro() {
   const navegar = useNavigate();
 
   const [form, setForm] = useState({ nome: '', email: '', senha: '', whatsapp: '' });
+  // Nasce desmarcado de propósito: caixa pré-marcada não vale como
+  // consentimento sob a LGPD.
+  const [aceiteTermos, setAceiteTermos] = useState(false);
   const [erro, setErro] = useState('');
   const [erros, setErros] = useState({});
   const [enviando, setEnviando] = useState(false);
@@ -47,6 +50,7 @@ export default function Cadastro() {
         email: form.email,
         senha: form.senha,
         whatsapp: form.whatsapp || undefined,
+        aceiteTermos,
       });
       navegar(`/verificar-email?email=${encodeURIComponent(form.email)}`, { replace: true });
     } catch (e) {
@@ -81,6 +85,15 @@ export default function Cadastro() {
                 <IconeGoogle />
                 Continuar com Google
               </a>
+              {/* Quem entra pelo Google não passa pela caixa de aceite abaixo,
+                  então o consentimento precisa estar declarado aqui. */}
+              <p className="ajuda" style={{ textAlign: 'center', marginTop: 8 }}>
+                Ao continuar com o Google, você aceita os{' '}
+                <Link to="/termos" target="_blank" rel="noreferrer" style={{ textDecoration: 'underline' }}>
+                  Termos de Uso
+                </Link>
+                .
+              </p>
               <div className="auth__ou">OU</div>
             </>
           ) : null}
@@ -158,7 +171,35 @@ export default function Cadastro() {
               )}
             </div>
 
-            <button type="submit" className="btn btn-escuro btn-bloco" disabled={enviando}>
+            <label className="aceite">
+              <input
+                type="checkbox"
+                checked={aceiteTermos}
+                onChange={(e) => {
+                  setAceiteTermos(e.target.checked);
+                  setErros((atual) => ({ ...atual, aceiteTermos: undefined }));
+                }}
+                aria-invalid={Boolean(erros.aceiteTermos)}
+              />
+              <span>
+                Li e aceito os{' '}
+                <Link to="/termos" target="_blank" rel="noreferrer">
+                  Termos de Uso e a Política de Privacidade
+                </Link>
+                .
+              </span>
+            </label>
+            {erros.aceiteTermos ? (
+              <p className="erro" style={{ marginTop: -8, marginBottom: 14 }}>
+                {erros.aceiteTermos}
+              </p>
+            ) : null}
+
+            <button
+              type="submit"
+              className="btn btn-escuro btn-bloco"
+              disabled={enviando || !aceiteTermos}
+            >
               {enviando ? <span className="spinner spinner-sm" /> : null}
               {enviando ? 'Criando conta...' : 'Criar conta'}
             </button>

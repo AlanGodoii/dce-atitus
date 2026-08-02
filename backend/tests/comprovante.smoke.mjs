@@ -52,7 +52,7 @@ function gerarCpf() {
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF', 'latin1');
 
 async function criarAluno(nome, email) {
-  let r = await req('POST', '/auth/register', { nome, email, senha: 'senha1234' });
+  let r = await req('POST', '/auth/register', { aceiteTermos: true, nome, email, senha: 'senha1234' });
 
   // Sem isto, uma falha de setup (rate limit, por exemplo) vira um token vazio
   // e o teste seguinte acusa "falha de seguranca" que nao existe.

@@ -102,7 +102,7 @@ async function fotoFake(nome, cor) {
 }
 
 async function garantirAluno(aluno, indice) {
-  let r = await chamar('POST', '/auth/register', {
+  let r = await chamar('POST', '/auth/register', { aceiteTermos: true,
     nome: aluno.nome,
     email: aluno.email,
     senha: SENHA_DEMO,

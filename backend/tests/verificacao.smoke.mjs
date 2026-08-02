@@ -41,13 +41,13 @@ function gerarCpf() {
 
 console.log('\n== bloqueio de e-mail descartável ==');
 for (const email of ['fulano@mailinator.com', 'x@yopmail.com', 'a@10minutemail.com', 'b@sub.mailinator.com']) {
-  const r = await req('POST', '/auth/register', { nome: 'Teste Descartavel', email, senha: 'senha1234' });
+  const r = await req('POST', '/auth/register', { aceiteTermos: true, nome: 'Teste Descartavel', email, senha: 'senha1234' });
   checar(`recusa ${email}`, r.status === 422, JSON.stringify(r.dados.detalhes ?? r.dados));
 }
 
 console.log('\n== cadastro nasce NÃO confirmado ==');
 const email = `verif.${Date.now()}@gmail.com`;
-let r = await req('POST', '/auth/register', { nome: 'Vera Verificada', email, senha: 'senha1234' });
+let r = await req('POST', '/auth/register', { aceiteTermos: true, nome: 'Vera Verificada', email, senha: 'senha1234' });
 checar('cadastro criado (201)', r.status === 201, JSON.stringify(r.dados).slice(0, 200));
 checar('usuario.emailVerificado = false', r.dados?.usuario?.emailVerificado === false);
 checar('resposta informa o envio da confirmação', r.dados?.verificacao !== undefined);
@@ -161,7 +161,7 @@ checar('status virou pagamento_em_analise', r.dados?.carteirinha?.status === 'pa
 
 console.log('\n== confirmação pelo link ==');
 const email2 = `link.${Date.now()}@gmail.com`;
-r = await req('POST', '/auth/register', { nome: 'Link Confirmado', email: email2, senha: 'senha1234' });
+r = await req('POST', '/auth/register', { aceiteTermos: true, nome: 'Link Confirmado', email: email2, senha: 'senha1234' });
 const token2 = r.dados.verificacao.dev.link.split('token=')[1];
 r = await req('POST', '/auth/verificar-email', { token: token2 });
 checar('link do e-mail confirma (200)', r.status === 200, JSON.stringify(r.dados));
@@ -169,7 +169,7 @@ checar('emailVerificado = true', r.dados?.usuario?.emailVerificado === true);
 
 console.log('\n== reenvio ==');
 const email3 = `reenvio.${Date.now()}@gmail.com`;
-r = await req('POST', '/auth/register', { nome: 'Rita Reenvio', email: email3, senha: 'senha1234' });
+r = await req('POST', '/auth/register', { aceiteTermos: true, nome: 'Rita Reenvio', email: email3, senha: 'senha1234' });
 const codigoAntigo = r.dados.verificacao.dev.codigo;
 
 r = await req('POST', '/auth/reenviar-verificacao', { email: email3 });
