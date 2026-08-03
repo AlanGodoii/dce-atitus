@@ -28,7 +28,12 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 # O client do Prisma é gerado a partir do schema, então precisa do schema antes.
+#
+# O prisma.config.js vem junto de propósito: o schema NÃO está no lugar padrão
+# (./prisma/schema.prisma), e é esse arquivo que aponta para src/prisma. Sem
+# ele o CLI procura no caminho padrão, não acha, e o build morre aqui.
 COPY src/prisma ./src/prisma
+COPY prisma.config.js ./
 RUN npx prisma generate
 
 COPY . .
