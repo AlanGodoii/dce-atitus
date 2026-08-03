@@ -45,7 +45,6 @@ Preencha no painel, em Environment:
 | `SMTP_PASS` | Chave SMTP do Brevo (começa com `xsmtpsib-`) |
 | `ADMIN_EMAIL` | E-mail de acesso do DCE ao painel |
 | `ADMIN_SENHA` | Senha inicial, **trocada no primeiro acesso** |
-| `DCE_RESPONSAVEL_NOME` | Nome impresso no verso da carteirinha |
 
 O `JWT_SECRET` é gerado pelo Render. Trocar depois desloga todos os alunos.
 

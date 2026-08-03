@@ -75,7 +75,5 @@ export const env = {
     nomeCompleto: process.env.DCE_NOME_COMPLETO ?? 'Diretório Central de Estudantes Matheus Teixeira',
     whatsapp: process.env.DCE_WHATSAPP ?? '',
     email: process.env.DCE_EMAIL ?? '',
-    responsavelNome: process.env.DCE_RESPONSAVEL_NOME ?? '',
-    responsavelCargo: process.env.DCE_RESPONSAVEL_CARGO ?? 'Presidente do DCE',
   },
 };

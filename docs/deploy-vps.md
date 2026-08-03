@@ -215,8 +215,8 @@ openssl rand -base64 32   # POSTGRES_PASSWORD
 openssl rand -hex 48      # JWT_SECRET
 ```
 
-Preencha também `ACME_EMAIL`, `SMTP_USER`, `SMTP_PASS`, `DCE_RESPONSAVEL_NOME`,
-`ADMIN_EMAIL` e `ADMIN_SENHA`.
+Preencha também `ACME_EMAIL`, `SMTP_USER`, `SMTP_PASS`, `ADMIN_EMAIL` e
+`ADMIN_SENHA`.
 
 Confira `API_URL` e `FRONTEND_URL` com atenção redobrada. **O endereço fica
 gravado dentro da imagem do QR Code na hora da emissão** — carteirinha emitida

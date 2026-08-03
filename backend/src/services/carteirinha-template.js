@@ -76,24 +76,6 @@ function logo(escala = 1, cor = PALETA.verde) {
     </div>`;
 }
 
-/**
- * Bloco da assinatura do responsavel. Se existir src/assets/assinatura.png, a
- * arte escaneada e impressa acima da linha; sem o arquivo, sai so a linha com o
- * nome e o cargo, que continua sendo um documento valido.
- */
-function blocoAssinatura() {
-  const b64 = lerBase64('assinatura.png');
-  const nome = env.dce.responsavelNome?.trim();
-
-  return `
-    <div class="assinatura">
-      ${b64 ? `<img class="assinatura-img" src="data:image/png;base64,${b64}" alt="" />` : ''}
-      <div class="assinatura-linha"></div>
-      ${nome ? `<div class="assinatura-nome">${escaparHtml(nome.toUpperCase())}</div>` : ''}
-      <div class="assinatura-cargo">${escaparHtml(env.dce.responsavelCargo)}</div>
-    </div>`;
-}
-
 // --- ornamento -------------------------------------------------------------
 
 /** O "S" que atravessa o fundo nas duas faces. */
@@ -237,23 +219,15 @@ function estilos() {
   }
   .validade-box strong{font-size:27px;font-weight:700;font-variant-numeric:tabular-nums;}
 
-  .verso-emissor{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;}
-  .verso-emissor .logo,.verso-emissor .logo-img{margin-bottom:14px;}
-  .emissor-linha{font-size:16.5px;line-height:1.5;color:#e9efec;align-self:stretch;}
+  /* Sem bloco de assinatura: o conteudo centraliza na altura do proprio
+     espaco, em vez de ficar preso no topo com vazio embaixo. */
+  .verso-emissor{
+    flex:1;min-width:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding-bottom:22px;
+  }
+  .verso-emissor .logo,.verso-emissor .logo-img{margin-bottom:18px;}
+  .emissor-linha{font-size:17px;line-height:1.55;color:#e9efec;align-self:stretch;text-align:center;}
   .emissor-linha strong{font-weight:700;color:${PALETA.branco};}
-  .assinatura{
-    margin-top:11px;align-self:stretch;border:2px solid rgba(255,255,255,0.5);
-    min-height:88px;display:flex;flex-direction:column;align-items:center;
-    justify-content:flex-end;padding:8px 16px 10px;
-  }
-  .assinatura-img{
-    max-height:44px;max-width:100%;object-fit:contain;margin-bottom:4px;
-    /* A assinatura e escaneada em preto; invertemos para ela aparecer no verde. */
-    filter:invert(1) brightness(2);
-  }
-  .assinatura-linha{width:100%;border-bottom:2px solid rgba(255,255,255,0.75);}
-  .assinatura-nome{font-size:14.5px;font-weight:700;margin-top:6px;text-align:center;line-height:1.2;}
-  .assinatura-cargo{font-size:12.5px;color:rgba(255,255,255,0.72);text-align:center;margin-top:2px;}
 
   .barra{
     background:rgba(0,0,0,0.22);margin:0 -44px;padding:15px 44px;
@@ -401,7 +375,6 @@ export function htmlVerso(dados = {}) {
           ${logo(0.62, PALETA.branco)}
           <div class="emissor-linha"><strong>EMISSOR:</strong> ${escaparHtml(env.dce.nome)}</div>
           <div class="emissor-linha">CNPJ: ${cnpj}</div>
-          ${blocoAssinatura()}
         </div>
       </div>
 
