@@ -44,18 +44,36 @@ ssh root@SEU_IP
 ### Criar um usuário sem privilégios
 
 Rodar tudo como root significa que qualquer descuido é um descuido com poder
-total. Crie um usuário e dê a ele acesso ao Docker e ao sudo:
+total. Crie um usuário e dê a ele acesso ao sudo:
 
 ```bash
 adduser dce
 usermod -aG sudo dce
-rsync --archive --chown=dce:dce ~/.ssh /home/dce
 ```
 
-O `rsync` copia a chave SSH que você já usou para entrar, então o novo usuário
-entra sem senha.
+Agora instale a sua chave pública para esse usuário. No **seu computador**, veja
+a chave:
 
-Abra **outro terminal** e confirme que funciona antes de seguir:
+```powershell
+Get-Content "$env:USERPROFILE\.ssh\id_ed25519.pub"
+```
+
+E no **servidor**, cole o conteúdo no lugar de `SUA_CHAVE_PUBLICA`:
+
+```bash
+mkdir -p /home/dce/.ssh
+echo "SUA_CHAVE_PUBLICA" > /home/dce/.ssh/authorized_keys
+chown -R dce:dce /home/dce/.ssh
+chmod 700 /home/dce/.ssh
+chmod 600 /home/dce/.ssh/authorized_keys
+```
+
+As permissões não são decoração: o SSH **recusa** silenciosamente uma chave em
+diretório que outros usuários possam ler, e o erro que aparece é o genérico de
+"permissão negada".
+
+Abra **outro terminal** e confirme que funciona **antes** de seguir — enquanto o
+terminal com root continua aberto, você ainda tem como voltar atrás:
 
 ```bash
 ssh dce@SEU_IP

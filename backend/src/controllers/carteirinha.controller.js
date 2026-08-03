@@ -2,7 +2,7 @@ import { prisma } from '../config/prisma.js';
 import { env } from '../config/env.js';
 import { AppError } from '../utils/AppError.js';
 import { formatarCpf } from '../utils/validadores.js';
-import { ROTULO_NIVEL } from '../validators/perfil.validator.js';
+import { ROTULO_DOCUMENTO, ROTULO_NIVEL } from '../validators/perfil.validator.js';
 import { urlValidacao } from '../services/qrcode.service.js';
 import { enviarCarteirinhaAprovada } from '../services/email.service.js';
 import { urlParaCaminho } from '../config/storage.js';
@@ -50,6 +50,7 @@ export function serializarCarteirinha(carteirinha, perfil, usuario) {
     ...DESCRICAO_STATUS[carteirinha.status],
     // Antes da aprovacao o QR simplesmente nao existe.
     qrCodeUuid: aprovada ? carteirinha.qrCodeUuid : null,
+    codigoUso: aprovada ? carteirinha.codigoUso : null,
     urlValidacao: aprovada ? urlValidacao(carteirinha.qrCodeUuid) : null,
     arquivoUrl: aprovada ? carteirinha.arquivoUrl : null,
     arquivoVersoUrl: aprovada ? carteirinha.arquivoVersoUrl : null,
@@ -66,6 +67,13 @@ export function serializarCarteirinha(carteirinha, perfil, usuario) {
       instituicao: env.dce.instituicao,
       fotoUrl: perfil.fotoUrl,
       dataNascimento: perfil.dataNascimento.toISOString().slice(0, 10),
+      // A prévia em tela imprime o documento igual ao cartão emitido — sem
+      // isso o aluno veria no site uma carteirinha diferente da que recebe.
+      documentoRotulo: perfil.documentoTipo
+        ? ROTULO_DOCUMENTO[perfil.documentoTipo] ?? perfil.documentoTipo
+        : null,
+      documentoNumero: perfil.documentoNumero,
+      documentoEmissor: perfil.documentoEmissor,
     },
   };
 }

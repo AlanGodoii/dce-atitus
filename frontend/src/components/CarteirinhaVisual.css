@@ -1,7 +1,9 @@
 /* Réplica em tela da frente da carteirinha.
    Tudo dimensionado em cqw (1cqw = 1% da largura do cartão), com os mesmos
    valores em px do template do Puppeteer divididos por 10,11.
-   Card de referência: 1011 x 638 px. */
+   Card de referência: 1011 x 638 px.
+
+   Espelha backend/src/services/carteirinha-template.js. Ao mexer lá, mexa aqui. */
 
 .cv-container {
   container-type: inline-size;
@@ -13,126 +15,84 @@
   position: relative;
   width: 100%;
   aspect-ratio: 1011 / 638;
-  background: var(--verde-800);
-  border-radius: 3.36cqw;
+  background: #e4e6e3;
+  border-radius: 2.57cqw;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  color: #fff;
+  color: #1f2421;
   box-shadow: var(--sombra-lg);
   font-family: 'Inter', var(--fonte);
 }
 
-.cv__tracos {
+.cv__swoosh {
   position: absolute;
+  top: 0;
+  right: -5.9cqw;
+  width: 61.3cqw;
+  height: 100%;
   pointer-events: none;
 }
-.cv__tracos path {
-  stroke: rgba(255, 255, 255, 0.32);
-  stroke-width: 2;
+.cv__swoosh path {
+  stroke: #d5d9d4;
+  stroke-width: 30;
+  stroke-linecap: round;
   fill: none;
 }
-.cv__tracos--topo {
-  top: 0;
-  right: 0;
-  width: 29.7cqw;
-  height: 14.8cqw;
-}
-.cv__tracos--rodape {
-  bottom: 0;
-  right: 5.9cqw;
-  width: 33.6cqw;
-  height: 10.9cqw;
-}
 
-/* --- logo ---------------------------------------------------------------- */
+/* --- logo, centralizado na largura inteira do cartão ---------------------- */
 
 .cv__logo {
+  position: absolute;
+  top: 2.57cqw;
+  left: 0;
+  width: 100%;
   display: block;
   line-height: 1;
+  text-align: center;
+  color: #0f5c39;
+  z-index: 3;
 }
 .cv__logo-sigla {
   display: block;
   font-family: 'Montserrat', 'Arial Black', sans-serif;
   font-weight: 800;
-  font-size: 6.13cqw;
+  font-size: 4.93cqw;
   letter-spacing: -0.02em;
 }
 .cv__logo-regua {
   display: block;
-  height: 0.4cqw;
-  background: #fff;
-  margin: 0.69cqw 0 0.49cqw;
+  width: 12.4cqw;
+  height: 0.34cqw;
+  background: #0f5c39;
+  margin: 0.51cqw auto 0.43cqw;
 }
 .cv__logo-inst {
   display: block;
   font-family: 'Montserrat', 'Arial Black', sans-serif;
   font-weight: 800;
-  font-size: 2.27cqw;
+  font-size: 1.78cqw;
   letter-spacing: 0.3em;
-  text-align: center;
   text-indent: 0.3em;
 }
 
-/* --- topo ---------------------------------------------------------------- */
+/* --- corpo ---------------------------------------------------------------- */
 
-.cv__topo {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2cqw;
-  padding: 2.57cqw 4.35cqw 2.18cqw;
-  position: relative;
+.cv__corpo {
+  position: absolute;
+  top: 18.6cqw;
+  left: 5.54cqw;
+  right: 29.7cqw;
+  bottom: 2.97cqw;
   z-index: 2;
-}
-.cv__titulo {
-  font-size: 3.07cqw;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  text-align: right;
-}
-
-/* --- miolo --------------------------------------------------------------- */
-
-.cv__miolo {
-  flex: 1;
-  background: var(--grafite);
-  display: flex;
-  align-items: center;
-  gap: 3.76cqw;
-  padding: 2.57cqw 4.35cqw;
-  min-height: 0;
-}
-
-.cv__foto {
-  width: 21.96cqw;
-  height: 29.28cqw;
-  flex-shrink: 0;
-  border-radius: 1.19cqw;
-  border: 0.4cqw solid #fff;
-  object-fit: cover;
-  background: #d8dbd9;
-}
-.cv__foto--vazia {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #8b8f8d;
-  font-size: 1.68cqw;
-  text-align: center;
-}
-
-.cv__dados {
-  flex: 1;
-  min-width: 0;
 }
 
 .cv__nome {
   font-size: 3.26cqw;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  margin-bottom: 1.88cqw;
+  font-weight: 600;
+  color: #0f5c39;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
   line-height: 1.12;
+  margin-bottom: 1.78cqw;
   overflow-wrap: break-word;
 }
 .cv__nome--sm {
@@ -142,24 +102,96 @@
   font-size: 2.27cqw;
 }
 
-.cv__campo {
-  font-size: 2.08cqw;
-  line-height: 1.62;
-  color: #f2f4f3;
+.cv__linha {
+  display: flex;
+  gap: 2.57cqw;
+  align-items: flex-start;
 }
-.cv__campo strong {
-  font-weight: 700;
+
+.cv__foto {
+  width: 22.35cqw;
+  height: 28.39cqw;
+  flex-shrink: 0;
+  object-fit: cover;
+  background: #221f1f;
+}
+.cv__foto--vazia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8f918e;
+  font-size: 1.58cqw;
+  text-align: center;
+}
+
+.cv__campos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.48cqw;
+}
+
+.cv__campo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.89cqw;
+  min-width: 0;
+}
+
+.cv__chip {
+  background: #0f5c39;
   color: #fff;
+  font-size: 1.34cqw;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 0.4cqw 0.99cqw;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cv__valor {
+  font-size: 1.78cqw;
+  font-weight: 600;
+  color: #1f2421;
+  line-height: 1.25;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+/* --- painel branco da direita -------------------------------------------- */
+
+.cv__painel {
+  position: absolute;
+  top: 4.35cqw;
+  right: 3.76cqw;
+  bottom: 0;
+  width: 24.73cqw;
+  z-index: 3;
+  background: #fff;
+  border-radius: 12.36cqw 12.36cqw 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3.36cqw 1.98cqw 2.97cqw;
+}
+
+/* Margem automática centraliza o QR no espaço entre o topo e o bloco do ano. */
+.cv__painel-qr {
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .cv__qr {
-  width: 21.17cqw;
-  height: 21.17cqw;
-  flex-shrink: 0;
-  border-radius: 1.39cqw;
-  border: 0.3cqw dashed rgba(255, 255, 255, 0.45);
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 1.58cqw;
+  width: 18.79cqw;
+  height: 18.79cqw;
+  border: 0.3cqw dashed #b9c2bc;
+  border-radius: 1.19cqw;
+  color: #8e9a93;
+  font-size: 1.38cqw;
   line-height: 1.4;
   display: flex;
   align-items: center;
@@ -168,28 +200,38 @@
   padding: 1.5cqw;
 }
 
-/* --- rodapé -------------------------------------------------------------- */
-
-.cv__rodape {
-  display: flex;
-  align-items: center;
-  gap: 2.57cqw;
-  padding: 1.58cqw 4.35cqw 2.18cqw;
-  position: relative;
-  z-index: 2;
+.cv__codigo-rotulo {
+  margin-top: 1.38cqw;
+  font-size: 1.09cqw;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #6d7a72;
+  text-align: center;
 }
-.cv__ano {
-  font-size: 5.24cqw;
+.cv__codigo-valor {
+  font-size: 2.08cqw;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  color: #0f5c39;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  line-height: 1.15;
+}
+
+.cv__painel-ano {
+  text-align: right;
+  width: 100%;
   line-height: 1;
 }
-.cv__divisor {
-  width: 0.2cqw;
-  height: 3.76cqw;
-  background: rgba(255, 255, 255, 0.55);
+.cv__painel-inst {
+  font-size: 2.97cqw;
+  font-weight: 400;
+  color: #0f5c39;
+  letter-spacing: 0.02em;
 }
-.cv__validade {
-  font-size: 2.18cqw;
-  color: #e8ecea;
+.cv__painel-numero {
+  font-size: 3.96cqw;
+  font-weight: 700;
+  color: #0f5c39;
+  letter-spacing: 0.01em;
 }
