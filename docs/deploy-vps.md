@@ -171,7 +171,7 @@ Host github.com
 E clone:
 
 ```bash
-git clone git@github.com:AlanGodoii/SEU_REPOSITORIO.git ~/dce
+git clone git@github.com:AlanGodoii/dce-atitus.git ~/dce
 cd ~/dce
 ```
 
