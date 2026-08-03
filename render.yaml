@@ -95,8 +95,9 @@ services:
         value: dce@atitus.edu.br
       - key: DCE_RESPONSAVEL_CARGO
         value: Presidente do DCE
+      # Não é segredo: sai impresso no verso de toda carteirinha emitida.
       - key: DCE_RESPONSAVEL_NOME
-        sync: false
+        value: Daniel Cavalheiro
 
       # E-mail (Brevo). Os dois primeiros são segredos.
       - key: SMTP_HOST
