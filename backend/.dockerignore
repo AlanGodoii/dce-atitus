@@ -1,0 +1,28 @@
+# Reinstalado dentro da imagem, e o do Windows não serve no Linux
+node_modules
+
+# Segredos nunca entram na imagem — as variáveis vêm do painel da hospedagem
+.env
+.env.local
+.env.*.local
+
+# Dados de runtime: em produção vivem num volume persistente, não na imagem
+uploads
+privado
+tmp
+
+# Não fazem parte do que roda em produção
+tests
+seed-demo.mjs
+limpar-dados-teste.mjs
+limpar-estudantes.mjs
+preview-carteirinha.mjs
+testar-email.mjs
+
+*.log
+npm-debug.log*
+.git
+.gitignore
+README.md
+Dockerfile
+.dockerignore

@@ -44,7 +44,7 @@ const BENEFICIOS = [
   {
     titulo: 'Documento oficial do DCE',
     texto:
-      'Emitida pelo Diretório Central Matheus Teixeira, com os dados e o padrão exigidos para a Carteira de Identificação Estudantil.',
+      'Emitida pelo Diretório Central de Estudantes Matheus Teixeira, com os dados e o padrão exigidos para a Carteira de Identificação Estudantil.',
     icone: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
         <path d="M12 2.7l7.5 3v5.6c0 4.4-3.1 8.2-7.5 9.4-4.4-1.2-7.5-5-7.5-9.4V5.7z" />
@@ -106,7 +106,7 @@ export default function Landing() {
 
           <p className="landing__subtitulo">
             A carteirinha oficial do{' '}
-            {config?.dce?.nomeCompleto ?? 'Diretório Central Matheus Teixeira'}.
+            {config?.dce?.nomeCompleto ?? 'Diretório Central de Estudantes Matheus Teixeira'}.
           </p>
           <p className="landing__apoio">
             Tenha sua carteirinha no celular e aproveite a meia-entrada garantida por lei.
@@ -194,7 +194,7 @@ export default function Landing() {
           <div>
             <LogoDce cor="branco" escala={0.55} />
             <p className="landing__footer-texto">
-              {config?.dce?.nomeCompleto ?? 'Diretório Central Matheus Teixeira'}
+              {config?.dce?.nomeCompleto ?? 'Diretório Central de Estudantes Matheus Teixeira'}
               <br />
               ATITUS Educação
             </p>

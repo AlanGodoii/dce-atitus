@@ -15,9 +15,19 @@ export async function obterNavegador() {
 
   navegadorPromise = puppeteer.launch({
     headless: true,
+    // Em produção usamos o Chromium do sistema (ver Dockerfile); em
+    // desenvolvimento, o que o Puppeteer baixou. A variável decide.
+    ...(process.env.PUPPETEER_EXECUTABLE_PATH
+      ? { executablePath: process.env.PUPPETEER_EXECUTABLE_PATH }
+      : {}),
     args: [
+      // Sem --no-sandbox o Chromium não sobe dentro de contêiner. É seguro aqui
+      // porque só renderizamos HTML que nós mesmos geramos, nunca conteúdo
+      // vindo de fora.
       '--no-sandbox',
       '--disable-setuid-sandbox',
+      // O /dev/shm padrão de contêiner tem 64 MB e o Chromium estoura isso ao
+      // renderizar, morrendo no meio da geração da carteirinha.
       '--disable-dev-shm-usage',
       '--font-render-hinting=none',
     ],

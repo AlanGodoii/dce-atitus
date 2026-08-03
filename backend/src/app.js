@@ -23,7 +23,10 @@ export function criarApp() {
 
   app.use(
     cors({
-      origin: env.isProd ? [env.frontendUrl] : true,
+      // Em produção, só as origens declaradas. Aceita lista separada por
+      // vírgula porque o site responde com e sem "www", e as duas variantes
+      // precisam estar liberadas — senão uma delas quebra em silêncio.
+      origin: env.isProd ? env.origensPermitidas : true,
       credentials: true,
     }),
   );

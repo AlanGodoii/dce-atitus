@@ -29,7 +29,7 @@ export default function PainelMarca() {
         </h2>
         {/* Texto decorativo: não busca a API porque esta tela aparece antes do
             login. O nome oficial vem de DCE_NOME_COMPLETO no backend. */}
-        <p>O documento oficial do Diretório Central Matheus Teixeira, direto no seu celular.</p>
+        <p>O documento oficial do Diretório Central de Estudantes Matheus Teixeira, direto no seu celular.</p>
 
         <ul className="auth__lista">
           <li>{CHECK} Meia-entrada garantida pela Lei nº 12.933/2013</li>
@@ -38,7 +38,7 @@ export default function PainelMarca() {
         </ul>
       </div>
 
-      <p className="auth__marca-rodape">DCE ATITUS · Diretório Central Matheus Teixeira</p>
+      <p className="auth__marca-rodape">DCE ATITUS · Diretório Central de Estudantes Matheus Teixeira</p>
     </aside>
   );
 }

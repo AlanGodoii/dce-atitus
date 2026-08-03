@@ -1,0 +1,124 @@
+# Sistema completo rodando num VPS: banco, API, site e HTTPS.
+#
+# No Render cada peça era um serviço gerenciado. Aqui são quatro contêineres na
+# mesma máquina, e o que amarra tudo é este arquivo. Para subir:
+#
+#   docker compose up -d --build
+#
+# As variáveis vêm do arquivo .env ao lado deste (veja .env.example).
+
+name: dce-carteirinha
+
+services:
+  # --------------------------------------------------------------------------
+  # Banco de dados
+  # --------------------------------------------------------------------------
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+
+    # Repare que NÃO existe "ports" aqui. O banco só é alcançável pelos outros
+    # contêineres, pela rede interna do compose. Publicar a 5432 no VPS seria
+    # expor o Postgres à internet inteira — é assim que bancos são sequestrados.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # --------------------------------------------------------------------------
+  # API
+  # --------------------------------------------------------------------------
+  api:
+    build:
+      context: ./backend
+    restart: unless-stopped
+
+    # A API roda "prisma migrate deploy" ao subir. Sem esperar o banco ficar
+    # pronto de verdade, a migração falha e o contêiner entra em ciclo de
+    # reinício. Por isso a condição é service_healthy, não apenas started.
+    depends_on:
+      db:
+        condition: service_healthy
+
+    env_file: .env
+
+    # O que é calculado aqui vence o que veio do .env.
+    environment:
+      NODE_ENV: production
+      PORT: 3333
+      DADOS_DIR: /app/dados
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public"
+
+    # Fotos, carteirinhas geradas e comprovantes de matrícula. Precisa ser
+    # volume: o sistema de arquivos do contêiner é descartado a cada deploy, e
+    # junto iriam os documentos de todos os alunos.
+    volumes:
+      - dados:/app/dados
+
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3333/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      # O primeiro start roda as migrações e pode demorar mais que o normal.
+      start_period: 60s
+
+  # --------------------------------------------------------------------------
+  # Site do estudante (arquivos estáticos)
+  # --------------------------------------------------------------------------
+  site:
+    build:
+      context: ./frontend
+      args:
+        # O Vite grava este endereço dentro do JavaScript na hora do build.
+        # Mudar de domínio exige reconstruir a imagem, não basta reiniciar.
+        VITE_API_URL: "https://${DOMINIO_API}"
+    restart: unless-stopped
+
+  # --------------------------------------------------------------------------
+  # Porta de entrada: HTTPS e roteamento por domínio
+  # --------------------------------------------------------------------------
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+
+    # Únicas portas abertas para a internet.
+    ports:
+      - '80:80'
+      - '443:443'
+
+    environment:
+      DOMINIO: ${DOMINIO}
+      DOMINIO_API: ${DOMINIO_API}
+      ACME_EMAIL: ${ACME_EMAIL}
+
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Guarda os certificados. Se este volume sumir, o Caddy pede tudo de novo
+      # à Let's Encrypt — que tem limite de emissões por semana e pode deixar o
+      # site sem HTTPS por dias.
+      - caddy_data:/data
+      - caddy_config:/config
+
+    depends_on:
+      - api
+      - site
+
+volumes:
+  postgres:
+  dados:
+  caddy_data:
+  caddy_config:

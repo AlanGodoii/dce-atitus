@@ -1,0 +1,13 @@
+# O projeto é desenvolvido no Windows e roda em Linux. Sem isto, o Git pode
+# gravar quebras de linha CRLF nos arquivos abaixo, e o Linux não perdoa:
+# um script com \r no fim da primeira linha falha com a mensagem inútil
+# "/usr/bin/env: 'bash\r': No such file or directory".
+#
+# Vale para tudo que é INTERPRETADO no servidor, não só para o que se edita.
+
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+Caddyfile   text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+.env.example text eol=lf

@@ -12,6 +12,20 @@ if (faltando.length > 0) {
   );
 }
 
+/**
+ * Origens autorizadas a chamar a API em producao. Vem de CORS_ORIGENS (lista
+ * separada por virgula); sem ela, cai no FRONTEND_URL sozinho.
+ */
+function lerOrigens() {
+  const extras = (process.env.CORS_ORIGENS ?? '')
+    .split(',')
+    .map((o) => o.trim().replace(/\/$/, ''))
+    .filter(Boolean);
+
+  const frontend = (process.env.FRONTEND_URL ?? 'http://localhost:5173').replace(/\/$/, '');
+  return [...new Set([frontend, ...extras])];
+}
+
 const bool = (valor, padrao = false) => {
   if (valor === undefined) return padrao;
   return ['1', 'true', 'yes', 'sim'].includes(String(valor).toLowerCase());
@@ -33,6 +47,7 @@ export const env = {
   apiUrl: (process.env.API_URL ?? 'http://localhost:3333').replace(/\/$/, ''),
   // URL da SPA (usada em CORS e no redirect pos-login social).
   frontendUrl: (process.env.FRONTEND_URL ?? 'http://localhost:5173').replace(/\/$/, ''),
+  origensPermitidas: lerOrigens(),
 
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID ?? '',
@@ -57,7 +72,7 @@ export const env = {
     valorCarteirinha: Number(process.env.DCE_VALOR_CARTEIRINHA ?? 30),
     // Nome oficial do diretorio, usado no verso da carteirinha e nos textos do
     // site. Fonte unica: mudar aqui muda em todo lugar que importa.
-    nomeCompleto: process.env.DCE_NOME_COMPLETO ?? 'Diretório Central Matheus Teixeira',
+    nomeCompleto: process.env.DCE_NOME_COMPLETO ?? 'Diretório Central de Estudantes Matheus Teixeira',
     whatsapp: process.env.DCE_WHATSAPP ?? '',
     email: process.env.DCE_EMAIL ?? '',
     responsavelNome: process.env.DCE_RESPONSAVEL_NOME ?? '',

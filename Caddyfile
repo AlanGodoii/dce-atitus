@@ -1,0 +1,43 @@
+# Porta de entrada do sistema.
+#
+# O Caddy pede e renova os certificados HTTPS sozinho na Let's Encrypt, redireciona
+# HTTP para HTTPS por padrão, e decide para qual contêiner mandar cada pedido
+# olhando o domínio. É a peça que o Render dava pronta.
+
+{
+	# Para onde a Let's Encrypt avisa quando uma renovação falha. Vale a pena:
+	# certificado vencido derruba o site inteiro, inclusive a validação por QR.
+	email {$ACME_EMAIL}
+}
+
+# ---------------------------------------------------------------------------
+# Site do estudante
+# ---------------------------------------------------------------------------
+{$DOMINIO} {
+	encode zstd gzip
+	reverse_proxy site:80
+}
+
+# Uma única versão do endereço evita confusão e mantém o QR Code coerente com
+# o que o aluno vê na barra do navegador.
+www.{$DOMINIO} {
+	redir https://{$DOMINIO}{uri} permanent
+}
+
+# ---------------------------------------------------------------------------
+# API
+# ---------------------------------------------------------------------------
+{$DOMINIO_API} {
+	encode zstd gzip
+
+	# Teto de tamanho para o corpo do pedido. O maior envio legítimo é o
+	# comprovante de matrícula, limitado a 10 MB no upload.middleware.js —
+	# 12 MB deixa margem para o overhead do multipart. Sem isto, o Caddy
+	# aceitaria uploads de qualquer tamanho e a memória do servidor viraria
+	# alvo fácil.
+	request_body {
+		max_size 12MB
+	}
+
+	reverse_proxy api:3333
+}

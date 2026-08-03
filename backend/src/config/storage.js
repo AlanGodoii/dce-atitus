@@ -5,17 +5,30 @@ import { env } from './env.js';
 
 const raizBackend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
+/**
+ * Onde ficam os arquivos que o sistema gera. Em producao aponta para o volume
+ * persistente (DADOS_DIR=/app/dados no Render); em desenvolvimento, para a
+ * propria pasta do backend.
+ *
+ * As duas subpastas precisam ficar sob a MESMA raiz porque o volume e um so —
+ * se `privado` ficasse fora dele, os comprovantes de matricula sumiriam a cada
+ * deploy.
+ */
+const raizDados = process.env.DADOS_DIR
+  ? path.resolve(process.env.DADOS_DIR)
+  : raizBackend;
+
 export const CAMINHOS = {
   raiz: raizBackend,
-  uploads: path.join(raizBackend, 'uploads'),
-  fotos: path.join(raizBackend, 'uploads', 'fotos'),
-  carteirinhas: path.join(raizBackend, 'uploads', 'carteirinhas'),
+  uploads: path.join(raizDados, 'uploads'),
+  fotos: path.join(raizDados, 'uploads', 'fotos'),
+  carteirinhas: path.join(raizDados, 'uploads', 'carteirinhas'),
   assets: path.join(raizBackend, 'src', 'assets'),
 
   // Fora de uploads/ de proposito: uploads/ e servido estaticamente, e o
   // comprovante de matricula nao pode ser acessivel por quem tiver a URL.
-  privado: path.join(raizBackend, 'privado'),
-  comprovantes: path.join(raizBackend, 'privado', 'comprovantes'),
+  privado: path.join(raizDados, 'privado'),
+  comprovantes: path.join(raizDados, 'privado', 'comprovantes'),
 };
 
 export function garantirPastas() {

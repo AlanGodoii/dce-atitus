@@ -22,7 +22,7 @@ export default function Termos() {
       .catch(() => setConfig(null));
   }, []);
 
-  const dce = config?.dce?.nomeCompleto ?? 'Diretório Central Matheus Teixeira';
+  const dce = config?.dce?.nomeCompleto ?? 'Diretório Central de Estudantes Matheus Teixeira';
   const contato = config?.dce?.email ?? 'dce@atitus.edu.br';
   const versao = config?.termos?.versao ?? '1.0';
   const vigencia = config?.termos?.vigencia

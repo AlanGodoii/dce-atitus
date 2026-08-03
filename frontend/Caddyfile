@@ -1,0 +1,25 @@
+# Servidor dos arquivos estáticos do site. Fica atrás do Caddy da raiz, que é
+# quem cuida do HTTPS — aqui é só HTTP interno, na rede do compose.
+
+:80 {
+	root * /srv
+	encode zstd gzip
+
+	# A SPA controla as rotas no navegador. Sem try_files, abrir
+	# /validar/abc123 direto — que é exatamente o que o QR Code da carteirinha
+	# faz — devolveria 404, porque esse arquivo não existe no disco.
+	try_files {path} /index.html
+	file_server
+
+	# O Vite põe um hash no nome dos arquivos de /assets, então cada versão tem
+	# nome próprio e pode ser cacheada para sempre. O index.html não pode: é ele
+	# que aponta para os arquivos novos depois de cada deploy.
+	@versionados path /assets/*
+	header @versionados Cache-Control "public, max-age=31536000, immutable"
+	header /index.html Cache-Control "no-cache"
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+}

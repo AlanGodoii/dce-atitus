@@ -1,0 +1,162 @@
+# Infraestrutura declarada em arquivo (Render Blueprint).
+#
+# Vale mais do que criar tudo clicando no painel: fica versionado no Git, dá
+# para revisar em code review, e se um dia precisar recriar o ambiente do zero
+# — ou migrar para outra conta quando a diretoria do DCE mudar — é um comando
+# em vez de reconstruir de memória.
+#
+# Para usar: no Render, "New" > "Blueprint" e aponte para este repositório.
+# As variáveis marcadas com sync:false NÃO ficam aqui e são preenchidas à mão
+# no painel; são os segredos.
+
+databases:
+  - name: dce-atitus-db
+    databaseName: dce_atitus
+    user: dce_atitus
+    plan: basic-256mb
+    postgresMajorVersion: "17"
+    # Guarda os backups diários. Sem isso, perder o banco é perder todas as
+    # carteirinhas emitidas — e não há como reemitir sem os dados dos alunos.
+    diskSizeGB: 1
+
+services:
+  # --------------------------------------------------------------------------
+  # API
+  # --------------------------------------------------------------------------
+  - type: web
+    name: dce-atitus-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: starter
+    region: oregon
+    healthCheckPath: /health
+
+    # Fotos, carteirinhas geradas e comprovantes de matrícula. Precisa ser
+    # disco de verdade: o sistema de arquivos do contêiner é descartado a cada
+    # deploy, e junto iriam os documentos de todos os alunos.
+    #
+    # Monta na RAIZ dos dados, não em uploads/, porque as duas subpastas
+    # (uploads pública e privado restrita) têm que caber no mesmo volume.
+    disk:
+      name: dados
+      mountPath: /app/dados
+      sizeGB: 10
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3333
+      - key: DADOS_DIR
+        value: /app/dados
+
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dce-atitus-db
+          property: connectionString
+
+      # Gerado pelo Render na criação. Trocar depois desloga todo mundo.
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+
+      # Endereços públicos. Ajuste depois de apontar o domínio — é o que fica
+      # gravado dentro do QR Code de cada carteirinha emitida.
+      - key: API_URL
+        value: https://api.dcematheusteixeira.com.br
+      - key: FRONTEND_URL
+        value: https://dcematheusteixeira.com.br
+      - key: CORS_ORIGENS
+        value: https://www.dcematheusteixeira.com.br
+
+      - key: VALIDAR_DOMINIO_EMAIL
+        value: "true"
+
+      # Dados do DCE
+      - key: DCE_NOME
+        value: DCE ATITUS
+      - key: DCE_NOME_COMPLETO
+        value: Diretório Central de Estudantes Matheus Teixeira
+      - key: DCE_INSTITUICAO
+        value: ATITUS
+      - key: DCE_CHAVE_PIX
+        value: "09178125000180"
+      - key: DCE_TIPO_CHAVE_PIX
+        value: CNPJ
+      - key: DCE_BENEFICIARIO_PIX
+        value: Diretório Central de Estudantes Matheus Teixeira
+      - key: DCE_VALOR_CARTEIRINHA
+        value: "10"
+      - key: DCE_WHATSAPP
+        value: "5554992368617"
+      - key: DCE_EMAIL
+        value: dce@atitus.edu.br
+      - key: DCE_RESPONSAVEL_CARGO
+        value: Presidente do DCE
+      - key: DCE_RESPONSAVEL_NOME
+        sync: false
+
+      # E-mail (Brevo). Os dois primeiros são segredos.
+      - key: SMTP_HOST
+        value: smtp-relay.brevo.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM_NAME
+        value: DCE ATITUS
+      - key: SMTP_FROM_EMAIL
+        value: dce@dcematheusteixeira.com.br
+      - key: SMTP_REPLY_TO
+        value: dce@atitus.edu.br
+      - key: EMAIL_ENVIO_ATIVO
+        value: "true"
+
+      # Login com Google: desligado. Preencher no painel se um dia for usado.
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        value: https://api.dcematheusteixeira.com.br/auth/google/callback
+
+      # Admin criado pelo seed. A senha é definida no painel e trocada no
+      # primeiro acesso — nunca deve ficar em arquivo versionado.
+      - key: ADMIN_NOME
+        value: Daniel Cavalheiro
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_SENHA
+        sync: false
+
+  # --------------------------------------------------------------------------
+  # Site (arquivos estáticos, sem custo)
+  # --------------------------------------------------------------------------
+  - type: web
+    name: dce-atitus-site
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+
+    envVars:
+      - key: VITE_API_URL
+        value: https://api.dcematheusteixeira.com.br
+
+    routes:
+      # A SPA controla as rotas no navegador. Sem isto, abrir
+      # /validar/abc direto (que é o que o QR Code faz) devolveria 404.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin

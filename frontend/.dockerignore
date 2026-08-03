@@ -1,0 +1,18 @@
+# Reinstalado dentro da imagem, e o do Windows não serve no Linux
+node_modules
+
+# O build é feito na imagem; o dist local só atrapalharia
+dist
+dist-ssr
+
+# Segredos e configuração de máquina
+.env
+.env.local
+.env.*.local
+
+*.log
+.git
+.gitignore
+README.md
+Dockerfile
+.dockerignore

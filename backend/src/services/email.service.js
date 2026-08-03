@@ -9,6 +9,9 @@ const smtp = {
   pass: process.env.SMTP_PASS ?? '',
   fromNome: process.env.SMTP_FROM_NAME ?? 'DCE ATITUS',
   fromEmail: process.env.SMTP_FROM_EMAIL ?? env.dce.email,
+  // Para onde vai a resposta do aluno. Importa quando o remetente é um endereço
+  // de domínio autenticado sem caixa: sem isto, responder devolve a mensagem.
+  replyTo: process.env.SMTP_REPLY_TO || env.dce.email || '',
 };
 
 /**
@@ -64,6 +67,7 @@ export async function enviarEmail({ para, assunto, html, texto, anexos = [] }) {
   try {
     const info = await transporte.sendMail({
       from: `"${smtp.fromNome}" <${smtp.fromEmail}>`,
+      ...(smtp.replyTo && smtp.replyTo !== smtp.fromEmail ? { replyTo: smtp.replyTo } : {}),
       to: para,
       subject: assunto,
       text: texto,
