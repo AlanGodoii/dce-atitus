@@ -73,6 +73,9 @@ const dadosPerfil = {
   matricula: '2024777888',
   curso: 'Psicologia',
   nivel: 'graduacao',
+  documentoTipo: 'rg',
+  documentoNumero: '1234567890',
+  documentoEmissor: 'SSP/RS',
   whatsapp: '54991112222',
 };
 

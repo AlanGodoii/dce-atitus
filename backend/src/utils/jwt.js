@@ -2,7 +2,11 @@ import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
 
 export function gerarToken(usuario) {
-  return jwt.sign({ role: usuario.role }, env.jwt.secret, {
+  // `ms` existe porque o `iat` padrao do JWT so tem precisao de SEGUNDOS, e a
+  // invalidacao de sessao por troca de senha precisa distinguir eventos dentro
+  // do mesmo segundo. Sem ele, um token emitido no mesmo segundo da redefinicao
+  // sobrevive a ela — que e exatamente quem a redefinicao deveria expulsar.
+  return jwt.sign({ role: usuario.role, ms: Date.now() }, env.jwt.secret, {
     subject: usuario.id,
     expiresIn: env.jwt.expiresIn,
   });

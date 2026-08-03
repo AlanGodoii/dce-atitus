@@ -25,6 +25,10 @@ const dados = {
   matricula: '2023014567',
   curso: 'Arquitetura e Urbanismo',
   nivel: 'graduacao',
+  documentoTipo: 'rg',
+  documentoNumero: '1234567890',
+  documentoEmissor: 'SSP/RS',
+  codigoUso: '7QK-M4FDA',
   fotoBase64: `data:image/jpeg;base64,${fotoExemplo.toString('base64')}`,
   qrDataUrl: await gerarQrCodeDataUrl('11111111-2222-3333-4444-555555555555'),
   dataEmissao: new Date('2026-07-29T00:00:00Z'),
@@ -44,8 +48,8 @@ async function render(html, arquivo) {
 }
 
 await render(htmlFrente(dados), 'frente.png');
-await render(htmlFrente({ ...dados, qrDataUrl: null }), 'frente-sem-qr.png');
-await render(htmlVerso(), 'verso.png');
+await render(htmlFrente({ ...dados, qrDataUrl: null, codigoUso: null }), 'frente-sem-qr.png');
+await render(htmlVerso(dados), 'verso.png');
 
 // Nome longo é o caso que mais quebra layout de carteirinha.
 await render(

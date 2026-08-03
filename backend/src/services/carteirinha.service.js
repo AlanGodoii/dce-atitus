@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { prisma } from '../config/prisma.js';
@@ -12,6 +13,59 @@ import { gerarQrCodeDataUrl } from './qrcode.service.js';
  */
 export function calcularValidade(dataEmissao = new Date()) {
   return new Date(Date.UTC(dataEmissao.getUTCFullYear() + 1, 2, 31));
+}
+
+// Alfabeto sem os pares que as pessoas confundem lendo em voz alta ou copiando
+// de um cartao impresso: 0/O, 1/I/L, 2/Z, 5/S, 8/B. Sobram 25 caracteres.
+const ALFABETO_CODIGO = '34679ACDEFGHJKMNPQRTUVWXY';
+
+function sortearCodigo() {
+  const bloco = (n) =>
+    Array.from({ length: n }, () => ALFABETO_CODIGO[crypto.randomInt(ALFABETO_CODIGO.length)]).join('');
+  return `${bloco(3)}-${bloco(5)}`;
+}
+
+/**
+ * Codigo de uso: "sequencia alfanumerica unica para cada CIE emitida"
+ * (Padrao Nacional da CIE, item 1.c).
+ *
+ * Nao substitui o qrCodeUuid, cumpre outro papel. O uuid existe para a maquina
+ * e vive dentro do QR; este aqui e feito para gente — cabe impresso no cartao,
+ * da para ditar por telefone e conferir a olho contra a tela de validacao.
+ */
+export async function gerarCodigoUso(cliente = prisma) {
+  for (let tentativa = 0; tentativa < 8; tentativa += 1) {
+    const codigo = sortearCodigo();
+    const existe = await cliente.carteirinha.findUnique({ where: { codigoUso: codigo } });
+    if (!existe) return codigo;
+  }
+  // Sao 25^8 combinacoes. Oito colisoes seguidas significam que alguma coisa
+  // esta muito errada — e emitir com codigo repetido e pior do que falhar aqui.
+  throw new Error('Nao foi possivel gerar um codigo de uso unico.');
+}
+
+/**
+ * Tudo que sai impresso, num lugar so. Antes isto vivia duplicado entre a
+ * emissao e o preview, e cada campo novo tinha que ser lembrado nos dois —
+ * era so questao de tempo ate um deles ficar para tras.
+ */
+function dadosImpressos({ perfil, usuario, carteirinha, fotoBase64, qrDataUrl }) {
+  return {
+    nome: usuario.nome,
+    cpf: perfil.cpf,
+    dataNascimento: perfil.dataNascimento,
+    matricula: perfil.matricula,
+    curso: perfil.curso,
+    nivel: perfil.nivel,
+    documentoTipo: perfil.documentoTipo,
+    documentoNumero: perfil.documentoNumero,
+    documentoEmissor: perfil.documentoEmissor,
+    codigoUso: carteirinha?.codigoUso ?? null,
+    fotoBase64,
+    qrDataUrl,
+    dataEmissao: carteirinha?.dataEmissao ?? new Date(),
+    dataValidade: carteirinha?.dataValidade ?? calcularValidade(),
+  };
 }
 
 async function fotoComoDataUri(fotoUrl) {
@@ -79,18 +133,7 @@ export async function gerarArquivosCarteirinha({ carteirinha, perfil, usuario })
     fotoComoDataUri(perfil.fotoUrl),
   ]);
 
-  const dados = {
-    nome: usuario.nome,
-    cpf: perfil.cpf,
-    dataNascimento: perfil.dataNascimento,
-    matricula: perfil.matricula,
-    curso: perfil.curso,
-    nivel: perfil.nivel,
-    fotoBase64,
-    qrDataUrl,
-    dataEmissao: carteirinha.dataEmissao ?? new Date(),
-    dataValidade: carteirinha.dataValidade ?? calcularValidade(),
-  };
+  const dados = dadosImpressos({ perfil, usuario, carteirinha, fotoBase64, qrDataUrl });
 
   const base = `${carteirinha.id}`;
   const caminhoFrente = path.join(CAMINHOS.carteirinhas, `${base}-frente.png`);
@@ -98,7 +141,7 @@ export async function gerarArquivosCarteirinha({ carteirinha, perfil, usuario })
   const caminhoPdf = path.join(CAMINHOS.carteirinhas, `${base}.pdf`);
 
   const frente = htmlFrente(dados);
-  const verso = htmlVerso();
+  const verso = htmlVerso(dados);
 
   await renderizarPng(frente, caminhoFrente);
   await renderizarPng(verso, caminhoVerso);
@@ -158,16 +201,7 @@ export async function reemitirCarteirinha(carteirinhaId) {
 /** Preview sem QR, usado na area do estudante antes da aprovacao. */
 export async function gerarPreviaFrente(perfil, usuario) {
   const fotoBase64 = await fotoComoDataUri(perfil.fotoUrl);
-  return htmlFrente({
-    nome: usuario.nome,
-    cpf: perfil.cpf,
-    dataNascimento: perfil.dataNascimento,
-    matricula: perfil.matricula,
-    curso: perfil.curso,
-    nivel: perfil.nivel,
-    fotoBase64,
-    qrDataUrl: null,
-    dataEmissao: new Date(),
-    dataValidade: calcularValidade(),
-  });
+  return htmlFrente(
+    dadosImpressos({ perfil, usuario, carteirinha: null, fotoBase64, qrDataUrl: null }),
+  );
 }

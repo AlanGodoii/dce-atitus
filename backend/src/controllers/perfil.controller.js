@@ -4,10 +4,21 @@ import { formatarCpf } from '../utils/validadores.js';
 import { processarFotoPerfil } from '../services/foto.service.js';
 import { removerComprovante, salvarComprovante } from '../services/comprovante.service.js';
 import { caminhoComprovante, removerArquivoSilencioso, urlParaCaminho } from '../config/storage.js';
+import { ROTULO_DOCUMENTO } from '../validators/perfil.validator.js';
 
 // Campos que saem impressos na carteirinha: uma vez emitida, mudar qualquer um
 // deles faria o documento em circulacao divergir do banco.
-const CAMPOS_IMPRESSOS = ['nome', 'cpf', 'dataNascimento', 'matricula', 'curso', 'nivel'];
+const CAMPOS_IMPRESSOS = [
+  'nome',
+  'cpf',
+  'dataNascimento',
+  'matricula',
+  'curso',
+  'nivel',
+  'documentoTipo',
+  'documentoNumero',
+  'documentoEmissor',
+];
 
 export function serializarPerfil(usuario) {
   const perfil = usuario.perfil;
@@ -23,6 +34,12 @@ export function serializarPerfil(usuario) {
     matricula: perfil.matricula,
     curso: perfil.curso,
     nivel: perfil.nivel,
+    documentoTipo: perfil.documentoTipo,
+    documentoNumero: perfil.documentoNumero,
+    documentoEmissor: perfil.documentoEmissor,
+    documentoRotulo: perfil.documentoTipo
+      ? ROTULO_DOCUMENTO[perfil.documentoTipo] ?? perfil.documentoTipo
+      : null,
     fotoUrl: perfil.fotoUrl,
     // O arquivo em si nunca vai na resposta — so a informacao de que existe.
     temComprovante: Boolean(perfil.comprovanteArquivo),
@@ -61,7 +78,18 @@ export async function obterPerfil(req, res) {
 }
 
 export async function salvarPerfil(req, res) {
-  const { nome, cpf, dataNascimento, matricula, curso, nivel, whatsapp } = req.body;
+  const {
+    nome,
+    cpf,
+    dataNascimento,
+    matricula,
+    curso,
+    nivel,
+    documentoTipo,
+    documentoNumero,
+    documentoEmissor,
+    whatsapp,
+  } = req.body;
   const usuarioId = req.usuario.id;
 
   const existente = await prisma.perfilEstudante.findUnique({
@@ -81,7 +109,17 @@ export async function salvarPerfil(req, res) {
     const carteirinha = existente.carteirinhas[0];
     if (carteirinha?.status === 'aprovada') {
       const mudou = CAMPOS_IMPRESSOS.filter((campo) => {
-        const novo = { nome, cpf, dataNascimento, matricula, curso, nivel }[campo];
+        const novo = {
+          nome,
+          cpf,
+          dataNascimento,
+          matricula,
+          curso,
+          nivel,
+          documentoTipo,
+          documentoNumero,
+          documentoEmissor,
+        }[campo];
         const atual = campo === 'nome' ? req.usuario.nome : existente[campo];
         if (campo === 'dataNascimento') {
           return new Date(novo).toISOString().slice(0, 10) !== atual.toISOString().slice(0, 10);
@@ -106,10 +144,21 @@ export async function salvarPerfil(req, res) {
       data: { nome, whatsapp },
     });
 
+    const campos = {
+      cpf,
+      dataNascimento,
+      matricula,
+      curso,
+      nivel,
+      documentoTipo,
+      documentoNumero,
+      documentoEmissor,
+    };
+
     const salvo = await tx.perfilEstudante.upsert({
       where: { usuarioId },
-      create: { usuarioId, cpf, dataNascimento, matricula, curso, nivel },
-      update: { cpf, dataNascimento, matricula, curso, nivel },
+      create: { usuarioId, ...campos },
+      update: campos,
     });
 
     // Primeira vez que o perfil fica completo: abre a carteirinha aguardando pagamento.

@@ -55,12 +55,11 @@ export async function redefinirSenha({ token, email, codigo, senha }) {
   const senhaHash = await bcrypt.hash(senha, CUSTO_BCRYPT);
   const agora = new Date();
 
-  // O `iat` do JWT só tem precisão de SEGUNDOS. Se guardássemos o instante com
-  // milissegundos, o token emitido logo depois desta troca (no mesmo segundo)
-  // pareceria anterior a ela e seria recusado — o usuário seria deslogado pela
-  // própria redefinição. Truncar para o segundo resolve, ao custo de uma janela
-  // de 1s em que um token antigo do mesmo segundo ainda passa.
-  const marcoSessao = new Date(Math.floor(agora.getTime() / 1000) * 1000);
+  // Precisão de milissegundos, sem truncar. Os tokens carregam o próprio `ms`
+  // (ver utils/jwt.js), então a comparação distingue o token antigo do novo
+  // mesmo quando os dois nascem no mesmo segundo. O token novo é emitido pelo
+  // controller DEPOIS desta transação, logo é sempre posterior a este marco.
+  const marcoSessao = agora;
 
   const [, usuario] = await prisma.$transaction([
     prisma.tokenVerificacao.update({ where: { id: registro.id }, data: { usadoEm: agora } }),

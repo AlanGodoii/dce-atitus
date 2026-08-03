@@ -1,4 +1,4 @@
-﻿import sharp from 'sharp';
+import sharp from 'sharp';
 
 const BASE = 'http://localhost:3333';
 let passou = 0;
@@ -94,6 +94,9 @@ r = await req(
     matricula: '2023014567',
     curso: 'Arquitetura e Urbanismo',
     nivel: 'graduacao',
+    documentoTipo: 'rg',
+    documentoNumero: '1234567890',
+    documentoEmissor: 'SSP/RS',
     whatsapp: '(54) 99236-8617',
   },
   tokenAluno,
@@ -218,7 +221,9 @@ r = await registrarVerificado({ nome: 'Joao Rejeitado', email: email2, senha: 's
 const token2 = r.dados.token;
 await req('POST', '/perfil', {
   nome: 'Joao Pedro Rejeitado', cpf: gerarCpf(), dataNascimento: '2000-03-15',
-  matricula: '2024001122', curso: 'Direito', nivel: 'graduacao', whatsapp: '54999887766',
+  matricula: '2024001122', curso: 'Direito', nivel: 'graduacao',
+  documentoTipo: 'rg', documentoNumero: '9876543210', documentoEmissor: 'SSP/RS',
+  whatsapp: '54999887766',
 }, token2);
 const fd2 = new FormData();
 fd2.append('foto', new Blob([foto], { type: 'image/jpeg' }), 'foto.jpg');

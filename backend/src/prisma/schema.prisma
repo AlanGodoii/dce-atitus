@@ -49,6 +49,16 @@ enum NivelEnsino {
   tecnico
 }
 
+/// Documentos de identidade aceitos pelo Padrao Nacional da CIE (item 1.b),
+/// que exige "documento de identidade (RG, CNH, RNE ou passaporte)" impresso
+/// na face do cartao, em campo separado do CPF.
+enum TipoDocumento {
+  rg
+  cnh
+  rne
+  passaporte
+}
+
 // ---------------------------------------------------------------------------
 // Modelos
 // ---------------------------------------------------------------------------
@@ -121,6 +131,14 @@ model PerfilEstudante {
   curso          String      @db.VarChar(120)
   nivel          NivelEnsino @default(graduacao)
 
+  /// Documento de identidade exigido pelo Padrao Nacional da CIE. Nulavel no
+  /// banco porque os perfis criados antes desta exigencia nao tem o dado — a
+  /// obrigatoriedade e aplicada no validador, para quem cadastra ou edita
+  /// daqui em diante. O emissor so faz sentido para RG (ex.: SSP/RS).
+  documentoTipo    TipoDocumento? @map("documento_tipo")
+  documentoNumero  String?        @map("documento_numero") @db.VarChar(30)
+  documentoEmissor String?        @map("documento_emissor") @db.VarChar(20)
+
   /// Comprovante de matricula: so o nome do arquivo, guardado em privado/.
   /// E o que da lastro ao "o DCE confirma a condicao de estudante" do verso.
   comprovanteArquivo String?   @map("comprovante_arquivo") @db.VarChar(255)
@@ -143,6 +161,12 @@ model Carteirinha {
 
   // Preenchido somente na aprovacao do pagamento. Ate la o QR nao existe.
   qrCodeUuid String? @unique @map("qr_code_uuid") @db.Uuid
+
+  /// Codigo de uso: "sequencia alfanumerica unica para cada CIE emitida"
+  /// (Padrao Nacional, item 1.c). E o identificador que uma pessoa consegue
+  /// ler e ditar por telefone, diferente do qrCodeUuid, que existe para a
+  /// maquina. Nasce junto com o QR, na aprovacao.
+  codigoUso String? @unique @map("codigo_uso") @db.VarChar(12)
 
   arquivoUrl      String?   @map("arquivo_url") @db.VarChar(500)
   arquivoVersoUrl String?   @map("arquivo_verso_url") @db.VarChar(500)

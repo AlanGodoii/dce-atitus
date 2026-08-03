@@ -1,5 +1,13 @@
 # Modelo da carteirinha — DCE ATITUS
 
+> **Desatualizado.** Descreve a arte verde escuro aprovada em 29/07/2026, que
+> foi substituída em 02/08/2026 pela arte clara com faixas verdes e painel
+> branco à direita. A fonte da verdade hoje é
+> `backend/src/services/carteirinha-template.js`; rode
+> `npm run preview:carteirinha` para ver o resultado. O que segue valendo deste
+> documento é o formato físico e os campos exigidos por lei — veja também
+> [`conformidade-cie.md`](conformidade-cie.md).
+
 Referência aprovada pelo Alan em 29/07/2026. Os dados e a foto do mockup são
 **placeholders**: o template do Puppeteer preenche tudo a partir de
 `perfis_estudante` + `usuarios`.

@@ -1,11 +1,19 @@
 # DNS do domínio — autenticação de e-mail
 
+> **Concluído em 02/08/2026.** Domínio autenticado no Brevo, com marca, e o
+> `SMTP_FROM_EMAIL` já aponta para `dce@dcematheusteixeira.com.br`. Envio real
+> testado e entregue na caixa de entrada. Este documento fica como registro do
+> que foi cadastrado e de como conferir.
+
 Registros que fazem o Brevo poder enviar e-mail como
-`dce@dcematheusteixeira.com.br`. Estão documentados aqui porque já se perderam
-uma vez: foram cadastrados enquanto o domínio ainda estava em transição, e a
-publicação da zona escreveu os padrões por cima.
+`dce@dcematheusteixeira.com.br`.
 
 Nada aqui é segredo — tudo isto fica público no DNS por definição.
+
+**Ao conferir, não use `a.auto.dns.br` pelo nome.** É anycast, e a consulta pode
+cair num nó com visão desatualizada — foi assim que passamos horas achando que a
+zona não publicava, quando estava tudo no ar. Pergunte a um resolvedor público
+(`8.8.8.8` ou `1.1.1.1`), que é o que o mundo enxerga.
 
 ## Onde mexer
 

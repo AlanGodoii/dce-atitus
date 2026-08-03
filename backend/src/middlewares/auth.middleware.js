@@ -46,8 +46,13 @@ export async function requireAuth(req, _res, next) {
 
     // Token emitido antes da ultima troca de senha nao vale mais. E o que faz a
     // redefinicao expulsar quem estiver logado em outro aparelho — inclusive
-    // alguem que tenha invadido a conta. O `iat` do JWT vem em segundos.
-    if (usuario.senhaAlteradaEm && payload.iat * 1000 < usuario.senhaAlteradaEm.getTime()) {
+    // alguem que tenha invadido a conta.
+    //
+    // Usa o `ms` do token, em milissegundos. O `iat` e a reserva para os tokens
+    // emitidos antes desse campo existir: eles so tem segundos, entao mantem a
+    // janela antiga de 1s ate expirarem sozinhos.
+    const emitidoEm = payload.ms ?? payload.iat * 1000;
+    if (usuario.senhaAlteradaEm && emitidoEm < usuario.senhaAlteradaEm.getTime()) {
       throw AppError.naoAutorizado('Sua senha foi alterada. Entre novamente.');
     }
 

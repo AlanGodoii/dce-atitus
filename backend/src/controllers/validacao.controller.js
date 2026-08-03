@@ -64,6 +64,10 @@ export async function validarCarteirinha(req, res) {
     },
     documento: {
       emissor: env.dce.nome,
+      // Existe para ser conferido a olho contra o que esta impresso no cartao.
+      // E o que impede alguem de apontar o celular para o QR de uma carteirinha
+      // valida e mostrar a tela ao lado de um cartao adulterado.
+      codigoUso: carteirinha.codigoUso,
       dataEmissao: carteirinha.dataEmissao,
       dataValidade: carteirinha.dataValidade,
     },

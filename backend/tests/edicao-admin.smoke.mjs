@@ -78,6 +78,9 @@ async function criarAlunoAprovado() {
     matricula: `2026${String(marca).slice(-6)}`,
     curso: 'Medicina',
     nivel: 'graduacao',
+    documentoTipo: 'rg',
+    documentoNumero: '1234567890',
+    documentoEmissor: 'SSP/RS',
     whatsapp: '54991110003',
   };
   await req('POST', '/perfil', dados, token);

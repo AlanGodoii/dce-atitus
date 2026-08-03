@@ -1,4 +1,4 @@
-﻿import sharp from 'sharp';
+import sharp from 'sharp';
 
 const BASE = 'http://localhost:3333';
 let passou = 0;
@@ -94,6 +94,9 @@ r = await req(
     matricula: '2023014567',
     curso: 'Arquitetura e Urbanismo',
     nivel: 'graduacao',
+    documentoTipo: 'rg',
+    documentoNumero: '1234567890',
+    documentoEmissor: 'SSP/RS',
     whatsapp: '54992368617',
   },
   token,
@@ -110,6 +113,9 @@ r = await req(
     matricula: '2023014567',
     curso: 'Arquitetura',
     nivel: 'graduacao',
+    documentoTipo: 'rg',
+    documentoNumero: '1234567890',
+    documentoEmissor: 'SSP/RS',
     whatsapp: '54992368617',
   },
   token,
@@ -126,6 +132,9 @@ r = await req(
     matricula: '2023014567',
     curso: 'Arquitetura',
     nivel: 'nivel_inexistente',
+    documentoTipo: 'rg',
+    documentoNumero: '1234567890',
+    documentoEmissor: 'SSP/RS',
     whatsapp: '54992368617',
   },
   token,
@@ -144,6 +153,9 @@ r = await req(
     matricula: '2023014567',
     curso: 'Arquitetura e Urbanismo',
     nivel: 'graduacao',
+    documentoTipo: 'rg',
+    documentoNumero: '1234567890',
+    documentoEmissor: 'SSP/RS',
     whatsapp: '(54) 99236-8617',
   },
   token,
@@ -172,6 +184,9 @@ r = await req(
     matricula: '2023099999',
     curso: 'Direito',
     nivel: 'graduacao',
+    documentoTipo: 'rg',
+    documentoNumero: '1234567890',
+    documentoEmissor: 'SSP/RS',
     whatsapp: '54999998888',
   },
   token2,
