@@ -49,9 +49,7 @@ enum NivelEnsino {
   tecnico
 }
 
-/// Documentos de identidade aceitos pelo Padrao Nacional da CIE (item 1.b),
-/// que exige "documento de identidade (RG, CNH, RNE ou passaporte)" impresso
-/// na face do cartao, em campo separado do CPF.
+/// SEM USO desde 04/08/2026. Ver o comentario em PerfilEstudante.
 enum TipoDocumento {
   rg
   cnh
@@ -131,10 +129,12 @@ model PerfilEstudante {
   curso          String      @db.VarChar(120)
   nivel          NivelEnsino @default(graduacao)
 
-  /// Documento de identidade exigido pelo Padrao Nacional da CIE. Nulavel no
-  /// banco porque os perfis criados antes desta exigencia nao tem o dado — a
-  /// obrigatoriedade e aplicada no validador, para quem cadastra ou edita
-  /// daqui em diante. O emissor so faz sentido para RG (ex.: SSP/RS).
+  /// SEM USO desde 04/08/2026: o DCE decidiu que a carteirinha nao leva mais
+  /// documento de identidade, entao nada preenche nem le estas colunas.
+  ///
+  /// Mantidas porque ha dado gravado de quando o campo existia, e apagar
+  /// coluna e irreversivel. Para remover de vez, uma migracao com DROP COLUMN
+  /// nas tres e DROP TYPE no enum resolve.
   documentoTipo    TipoDocumento? @map("documento_tipo")
   documentoNumero  String?        @map("documento_numero") @db.VarChar(30)
   documentoEmissor String?        @map("documento_emissor") @db.VarChar(20)

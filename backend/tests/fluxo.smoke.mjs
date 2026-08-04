@@ -94,9 +94,6 @@ r = await req(
     matricula: '2023014567',
     curso: 'Arquitetura e Urbanismo',
     nivel: 'graduacao',
-    documentoTipo: 'rg',
-    documentoNumero: '1234567890',
-    documentoEmissor: 'SSP/RS',
     whatsapp: '(54) 99236-8617',
   },
   tokenAluno,
@@ -222,7 +219,6 @@ const token2 = r.dados.token;
 await req('POST', '/perfil', {
   nome: 'Joao Pedro Rejeitado', cpf: gerarCpf(), dataNascimento: '2000-03-15',
   matricula: '2024001122', curso: 'Direito', nivel: 'graduacao',
-  documentoTipo: 'rg', documentoNumero: '9876543210', documentoEmissor: 'SSP/RS',
   whatsapp: '54999887766',
 }, token2);
 const fd2 = new FormData();

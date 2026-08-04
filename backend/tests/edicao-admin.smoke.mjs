@@ -78,9 +78,6 @@ async function criarAlunoAprovado() {
     matricula: `2026${String(marca).slice(-6)}`,
     curso: 'Medicina',
     nivel: 'graduacao',
-    documentoTipo: 'rg',
-    documentoNumero: '1234567890',
-    documentoEmissor: 'SSP/RS',
     whatsapp: '54991110003',
   };
   await req('POST', '/perfil', dados, token);
@@ -168,42 +165,6 @@ checar('identifica o campo alterado', (r.dados.camposAlterados ?? []).includes('
 checar('REEMITIU a carteirinha', r.dados.reemissao?.reemitida === true, JSON.stringify(r.dados.reemissao));
 checar('gerou arquivo novo', !!r.dados.reemissao?.arquivoUrl);
 checar('reportou o envio de e-mail', typeof r.dados.email?.enviado === 'boolean', JSON.stringify(r.dados.email));
-
-console.log('\n== correcao do documento de identidade ==');
-// O documento vai impresso na frente, entao corrigi-lo tem que reemitir igual
-// ao curso. Sem este teste, o campo novo entraria no formulario mas poderia
-// nunca chegar ao cartao de quem ja tem carteirinha emitida.
-r = await req(
-  'PATCH',
-  `/admin/estudantes/${perfilId}`,
-  { ...base, curso: cursoNovo, documentoNumero: '5566778899', documentoEmissor: 'SSP/SC' },
-  tk,
-);
-checar('edicao aceita (200)', r.status === 200, JSON.stringify(r.dados).slice(0, 150));
-checar(
-  'identifica documentoNumero como alterado',
-  (r.dados.camposAlterados ?? []).includes('documentoNumero'),
-  JSON.stringify(r.dados.camposAlterados),
-);
-checar(
-  'identifica documentoEmissor como alterado',
-  (r.dados.camposAlterados ?? []).includes('documentoEmissor'),
-  JSON.stringify(r.dados.camposAlterados),
-);
-checar('REEMITIU por causa do documento', r.dados.reemissao?.reemitida === true, JSON.stringify(r.dados.reemissao));
-
-r = await req(
-  'PATCH',
-  `/admin/estudantes/${perfilId}`,
-  { ...base, curso: cursoNovo, documentoTipo: 'cnh', documentoNumero: '5566778899', documentoEmissor: '' },
-  tk,
-);
-checar('troca de tipo aceita (200)', r.status === 200, JSON.stringify(r.dados.detalhes ?? r.dados).slice(0, 150));
-checar(
-  'CNH nao exige orgao expedidor',
-  (r.dados.camposAlterados ?? []).includes('documentoTipo'),
-  JSON.stringify(r.dados.camposAlterados),
-);
 
 console.log('\n== o QR continua o mesmo ==');
 const depois = await req('GET', `/admin/estudantes?busca=${encodeURIComponent(aluno.email)}`, null, tk);

@@ -14,17 +14,6 @@ export const ROTULO_NIVEL = {
   tecnico: 'Técnico',
 };
 
-/// Documentos aceitos pelo Padrão Nacional da CIE (item 1.b). A ordem aqui é a
-/// que aparece na norma, e é a que o formulário usa.
-export const TIPOS_DOCUMENTO = ['rg', 'cnh', 'rne', 'passaporte'];
-
-export const ROTULO_DOCUMENTO = {
-  rg: 'RG',
-  cnh: 'CNH',
-  rne: 'RNE',
-  passaporte: 'Passaporte',
-};
-
 export const perfilSchema = z.object({
   nome: z
     .string({ required_error: 'Informe seu nome completo.' })
@@ -79,36 +68,6 @@ export const perfilSchema = z.object({
 
   nivel: z.enum(NIVEIS, { errorMap: () => ({ message: 'Nível de ensino inválido.' }) }),
 
-  documentoTipo: z.enum(TIPOS_DOCUMENTO, {
-    errorMap: () => ({ message: 'Escolha RG, CNH, RNE ou passaporte.' }),
-  }),
-
-  documentoNumero: z
-    .string({ required_error: 'Informe o número do documento de identidade.' })
-    .trim()
-    .transform((v) => v.replace(/\s+/g, ' ').toUpperCase())
-    .refine((v) => v.length >= 5 && v.length <= 30, {
-      message: 'O documento deve ter entre 5 e 30 caracteres.',
-    })
-    .refine((v) => /^[A-Z0-9.\-/ ]+$/.test(v), {
-      message: 'O documento aceita apenas letras, números, ponto, hífen e barra.',
-    }),
-
-  // Só o RG tem órgão expedidor; a obrigatoriedade condicional está no
-  // superRefine abaixo, onde dá para olhar o tipo escolhido.
-  documentoEmissor: z
-    .string()
-    .trim()
-    .transform((v) => v.replace(/\s+/g, ' ').toUpperCase())
-    .refine((v) => v === '' || (v.length >= 2 && v.length <= 20), {
-      message: 'Órgão expedidor muito longo.',
-    })
-    .refine((v) => v === '' || /^[A-Z0-9.\-/ ]+$/.test(v), {
-      message: 'Órgão expedidor inválido. Use o formato SSP/RS.',
-    })
-    .optional()
-    .default(''),
-
   whatsapp: z
     .string({ required_error: 'Informe o WhatsApp.' })
     .trim()
@@ -116,21 +75,4 @@ export const perfilSchema = z.object({
     .refine((v) => v !== null, {
       message: 'WhatsApp inválido. Use DDD + número, ex: (54) 99999-9999.',
     }),
-})
-  .superRefine((dados, ctx) => {
-    // O padrão nacional pede "as siglas do órgão expedidor do RG e respectiva
-    // UF". CNH, RNE e passaporte não têm equivalente, então a exigência vale
-    // só para RG — cobrar dos outros seria inventar campo que não existe.
-    if (dados.documentoTipo === 'rg' && !dados.documentoEmissor) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['documentoEmissor'],
-        message: 'Informe o órgão expedidor do RG, ex: SSP/RS.',
-      });
-    }
-  })
-  .transform((dados) => ({
-    ...dados,
-    // Vazio vira nulo: no banco a ausência é NULL, não string em branco.
-    documentoEmissor: dados.documentoEmissor || null,
-  }));
+});

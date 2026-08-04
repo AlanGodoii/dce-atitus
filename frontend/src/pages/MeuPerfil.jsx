@@ -14,15 +14,6 @@ const NIVEIS = [
   { valor: 'tecnico', rotulo: 'Técnico' },
 ];
 
-// O Padrão Nacional da CIE exige um documento de identidade impresso na
-// carteirinha, em campo separado do CPF.
-const TIPOS_DOCUMENTO = [
-  { valor: 'rg', rotulo: 'RG' },
-  { valor: 'cnh', rotulo: 'CNH' },
-  { valor: 'rne', rotulo: 'RNE' },
-  { valor: 'passaporte', rotulo: 'Passaporte' },
-];
-
 const VAZIO = {
   nome: '',
   cpf: '',
@@ -30,9 +21,6 @@ const VAZIO = {
   matricula: '',
   curso: '',
   nivel: 'graduacao',
-  documentoTipo: 'rg',
-  documentoNumero: '',
-  documentoEmissor: '',
   whatsapp: '',
 };
 
@@ -92,9 +80,6 @@ export default function MeuPerfil() {
             matricula: data.perfil.matricula ?? '',
             curso: data.perfil.curso ?? '',
             nivel: data.perfil.nivel ?? 'graduacao',
-            documentoTipo: data.perfil.documentoTipo ?? 'rg',
-            documentoNumero: data.perfil.documentoNumero ?? '',
-            documentoEmissor: data.perfil.documentoEmissor ?? '',
             whatsapp: mascararTelefone(data.perfil.whatsapp ?? ''),
           });
         } else {
@@ -115,19 +100,6 @@ export default function MeuPerfil() {
       setErros((atual) => ({ ...atual, [campo]: undefined }));
       setSucesso('');
     };
-  }
-
-  // Só o RG tem órgão expedidor. Trocar de RG para CNH sem limpar o campo faria
-  // o "SSP/RS" sair impresso ao lado do número da habilitação.
-  function alterarTipoDocumento(e) {
-    const documentoTipo = e.target.value;
-    setForm((atual) => ({
-      ...atual,
-      documentoTipo,
-      documentoEmissor: documentoTipo === 'rg' ? atual.documentoEmissor : '',
-    }));
-    setErros((atual) => ({ ...atual, documentoTipo: undefined, documentoEmissor: undefined }));
-    setSucesso('');
   }
 
   async function salvar(evento) {
@@ -279,57 +251,6 @@ export default function MeuPerfil() {
                   />
                   {erros.cpf ? <p className="erro">{erros.cpf}</p> : null}
                 </div>
-
-                <div className="campo">
-                  <label htmlFor="documentoTipo">
-                    Documento de identidade <span className="obrigatorio">*</span>
-                  </label>
-                  <select
-                    id="documentoTipo"
-                    value={form.documentoTipo}
-                    onChange={alterarTipoDocumento}
-                    required
-                  >
-                    {TIPOS_DOCUMENTO.map((t) => (
-                      <option key={t.valor} value={t.valor}>
-                        {t.rotulo}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="campo">
-                  <label htmlFor="documentoNumero">
-                    Número do documento <span className="obrigatorio">*</span>
-                  </label>
-                  <input
-                    id="documentoNumero"
-                    value={form.documentoNumero}
-                    onChange={alterar('documentoNumero')}
-                    aria-invalid={Boolean(erros.documentoNumero)}
-                    required
-                  />
-                  {erros.documentoNumero ? <p className="erro">{erros.documentoNumero}</p> : null}
-                </div>
-
-                {form.documentoTipo === 'rg' ? (
-                  <div className="campo">
-                    <label htmlFor="documentoEmissor">
-                      Órgão expedidor <span className="obrigatorio">*</span>
-                    </label>
-                    <input
-                      id="documentoEmissor"
-                      placeholder="SSP/RS"
-                      value={form.documentoEmissor}
-                      onChange={alterar('documentoEmissor')}
-                      aria-invalid={Boolean(erros.documentoEmissor)}
-                      required
-                    />
-                    {erros.documentoEmissor ? (
-                      <p className="erro">{erros.documentoEmissor}</p>
-                    ) : null}
-                  </div>
-                ) : null}
 
                 <div className="campo">
                   <label htmlFor="dataNascimento">

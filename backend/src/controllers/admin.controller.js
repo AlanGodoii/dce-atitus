@@ -1,7 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { AppError } from '../utils/AppError.js';
 import { formatarCpf, formatarTelefoneExibicao } from '../utils/validadores.js';
-import { ROTULO_DOCUMENTO, ROTULO_NIVEL } from '../validators/perfil.validator.js';
+import { ROTULO_NIVEL } from '../validators/perfil.validator.js';
 import {
   calcularValidade,
   gerarArquivosCarteirinha,
@@ -270,12 +270,6 @@ export async function listarEstudantes(req, res) {
         nivel: perfil.nivel,
         dataNascimento: perfil.dataNascimento.toISOString().slice(0, 10),
         nivelRotulo: ROTULO_NIVEL[perfil.nivel] ?? perfil.nivel,
-        documentoTipo: perfil.documentoTipo,
-        documentoNumero: perfil.documentoNumero,
-        documentoEmissor: perfil.documentoEmissor,
-        documentoRotulo: perfil.documentoTipo
-          ? ROTULO_DOCUMENTO[perfil.documentoTipo] ?? perfil.documentoTipo
-          : null,
         fotoUrl: perfil.fotoUrl,
         cadastradoEm: perfil.usuario.criadoEm,
         carteirinha: carteirinha
@@ -305,18 +299,7 @@ export async function listarEstudantes(req, res) {
  */
 export async function editarEstudante(req, res) {
   const { perfilId } = req.params;
-  const {
-    nome,
-    cpf,
-    dataNascimento,
-    matricula,
-    curso,
-    nivel,
-    documentoTipo,
-    documentoNumero,
-    documentoEmissor,
-    whatsapp,
-  } = req.body;
+  const { nome, cpf, dataNascimento, matricula, curso, nivel, whatsapp } = req.body;
 
   const perfil = await prisma.perfilEstudante.findUnique({
     where: { id: perfilId },
@@ -339,9 +322,6 @@ export async function editarEstudante(req, res) {
     matricula: perfil.matricula,
     curso: perfil.curso,
     nivel: perfil.nivel,
-    documentoTipo: perfil.documentoTipo,
-    documentoNumero: perfil.documentoNumero,
-    documentoEmissor: perfil.documentoEmissor,
     dataNascimento: perfil.dataNascimento.toISOString().slice(0, 10),
   };
 
@@ -349,16 +329,7 @@ export async function editarEstudante(req, res) {
     prisma.usuario.update({ where: { id: perfil.usuarioId }, data: { nome, whatsapp } }),
     prisma.perfilEstudante.update({
       where: { id: perfil.id },
-      data: {
-        cpf,
-        dataNascimento,
-        matricula,
-        curso,
-        nivel,
-        documentoTipo,
-        documentoNumero,
-        documentoEmissor,
-      },
+      data: { cpf, dataNascimento, matricula, curso, nivel },
     }),
   ]);
 
@@ -368,9 +339,6 @@ export async function editarEstudante(req, res) {
     matricula,
     curso,
     nivel,
-    documentoTipo,
-    documentoNumero,
-    documentoEmissor,
     dataNascimento: new Date(dataNascimento).toISOString().slice(0, 10),
   };
 

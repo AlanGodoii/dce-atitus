@@ -73,12 +73,6 @@ export default function CarteirinhaVisual({ estudante, dataEmissao, codigoUso })
               <Campo rotulo="Grau">{NIVEIS[estudante?.nivel] ?? estudante?.nivelRotulo ?? '--'}</Campo>
               <Campo rotulo="Curso">{(estudante?.curso ?? '--').toUpperCase()}</Campo>
               <Campo rotulo="Data de nascimento">{formatarData(estudante?.dataNascimento)}</Campo>
-              {estudante?.documentoNumero ? (
-                <Campo rotulo={estudante.documentoRotulo ?? 'Documento'}>
-                  {estudante.documentoNumero}
-                  {estudante.documentoEmissor ? ` ${estudante.documentoEmissor}` : ''}
-                </Campo>
-              ) : null}
               <Campo rotulo="CPF">{estudante?.cpfFormatado ?? '--'}</Campo>
               <Campo rotulo="Matrícula">{estudante?.matricula ?? '--'}</Campo>
             </div>

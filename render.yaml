@@ -88,7 +88,7 @@ services:
       - key: DCE_BENEFICIARIO_PIX
         value: Diretório Central de Estudantes Matheus Teixeira
       - key: DCE_VALOR_CARTEIRINHA
-        value: "10"
+        value: "8"
       - key: DCE_WHATSAPP
         value: "5554992368617"
       - key: DCE_EMAIL

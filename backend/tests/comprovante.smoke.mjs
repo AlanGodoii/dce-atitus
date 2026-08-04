@@ -75,9 +75,6 @@ async function criarAluno(nome, email) {
     matricula: `2026${Math.floor(Math.random() * 900000 + 100000)}`,
     curso: 'Ciência da Computação',
     nivel: 'graduacao',
-    documentoTipo: 'rg',
-    documentoNumero: '1234567890',
-    documentoEmissor: 'SSP/RS',
     whatsapp: '54991110000',
   }, token);
 

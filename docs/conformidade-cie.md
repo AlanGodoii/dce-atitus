@@ -19,7 +19,6 @@ carteirinha valer meia-entrada?*
 | Grau de escolaridade | `perfis_estudante.nivel` |
 | Curso | `perfis_estudante.curso` |
 | Data de nascimento | `perfis_estudante.data_nascimento` |
-| Documento de identidade | `documento_tipo` + `documento_numero` + `documento_emissor` |
 | CPF | `perfis_estudante.cpf` |
 | Código de uso | `carteirinhas.codigo_uso` |
 | Validade **no verso** | `carteirinhas.data_validade` |
@@ -39,6 +38,13 @@ do semestre corrente, com guarda do arquivo em área restrita.
 
 **Canal de atendimento ao estudante** (item 3.i): WhatsApp do DCE impresso no
 verso.
+
+## Removido depois, por decisão do DCE
+
+**Documento de identidade.** O padrão exige RG, CNH, RNE ou passaporte impresso
+na face, em campo separado do CPF. Chegou a ser implementado, e em 04/08/2026 o
+DCE pediu para tirar — do formulário e do cartão. As colunas seguem no banco,
+sem uso, porque havia dado gravado.
 
 ## O que NÃO cumprimos
 

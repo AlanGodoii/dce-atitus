@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { CAMINHOS } from '../config/storage.js';
 import { env } from '../config/env.js';
-import { ROTULO_DOCUMENTO, ROTULO_NIVEL } from '../validators/perfil.validator.js';
+import { ROTULO_NIVEL } from '../validators/perfil.validator.js';
 import {
   formatarCnpj,
   formatarCpf,
@@ -260,19 +260,6 @@ const campo = (rotulo, valor) =>
   `<div class="campo"><span class="chip">${rotulo}:</span><span class="valor">${valor}</span></div>`;
 
 /**
- * Documento de identidade, que o Padrao Nacional da CIE exige em campo
- * separado do CPF — a arte original trazia os dois juntos em "CPF/CIN".
- * Sai vazio para os perfis cadastrados antes desta exigencia: melhor uma
- * linha a menos do que um rotulo apontando para o nada.
- */
-function campoDocumento(dados) {
-  if (!dados.documentoNumero) return '';
-  const rotulo = ROTULO_DOCUMENTO[dados.documentoTipo] ?? 'Documento';
-  const emissor = dados.documentoEmissor ? ` ${escaparHtml(dados.documentoEmissor)}` : '';
-  return campo(escaparHtml(rotulo), `${escaparHtml(dados.documentoNumero)}${emissor}`);
-}
-
-/**
  * @param {object} dados
  * @param {string} dados.nome
  * @param {string} dados.cpf            somente digitos
@@ -280,9 +267,6 @@ function campoDocumento(dados) {
  * @param {string} dados.matricula
  * @param {string} dados.curso
  * @param {string} dados.nivel          chave do enum NivelEnsino
- * @param {string|null} dados.documentoTipo
- * @param {string|null} dados.documentoNumero
- * @param {string|null} dados.documentoEmissor
  * @param {string|null} dados.codigoUso   nulo antes da aprovacao
  * @param {string|null} dados.fotoBase64  data URI da foto
  * @param {string|null} dados.qrDataUrl   data URI do QR (null antes da aprovacao)
@@ -314,7 +298,6 @@ export function htmlFrente(dados) {
           ${campo('Grau', escaparHtml(ROTULO_NIVEL[dados.nivel] ?? dados.nivel))}
           ${campo('Curso', escaparHtml(dados.curso.toUpperCase()))}
           ${campo('Data de nascimento', formatarDataBr(dados.dataNascimento))}
-          ${campoDocumento(dados)}
           ${campo('CPF', formatarCpf(dados.cpf))}
           ${campo('Matr&iacute;cula', escaparHtml(dados.matricula))}
         </div>

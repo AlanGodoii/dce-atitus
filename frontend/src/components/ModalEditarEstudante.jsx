@@ -10,13 +10,6 @@ const NIVEIS = [
   { valor: 'tecnico', rotulo: 'Técnico' },
 ];
 
-const TIPOS_DOCUMENTO = [
-  { valor: 'rg', rotulo: 'RG' },
-  { valor: 'cnh', rotulo: 'CNH' },
-  { valor: 'rne', rotulo: 'RNE' },
-  { valor: 'passaporte', rotulo: 'Passaporte' },
-];
-
 const soDigitos = (v) => String(v ?? '').replace(/\D/g, '');
 
 function mascararCpf(valor) {
@@ -51,9 +44,6 @@ export default function ModalEditarEstudante({ estudante, aoFechar, aoSalvar }) 
     matricula: estudante.matricula ?? '',
     curso: estudante.curso ?? '',
     nivel: estudante.nivel ?? 'graduacao',
-    documentoTipo: estudante.documentoTipo ?? 'rg',
-    documentoNumero: estudante.documentoNumero ?? '',
-    documentoEmissor: estudante.documentoEmissor ?? '',
     whatsapp: mascararTelefone(estudante.whatsappFormatado ?? ''),
   });
   const [erro, setErro] = useState('');
@@ -72,18 +62,6 @@ export default function ModalEditarEstudante({ estudante, aoFechar, aoSalvar }) 
       setForm((atual) => ({ ...atual, [campo]: valor }));
       setErros((atual) => ({ ...atual, [campo]: undefined }));
     };
-  }
-
-  // Só o RG tem órgão expedidor. Sem limpar na troca, o "SSP/RS" sairia
-  // impresso ao lado do número de uma CNH.
-  function alterarTipoDocumento(e) {
-    const documentoTipo = e.target.value;
-    setForm((atual) => ({
-      ...atual,
-      documentoTipo,
-      documentoEmissor: documentoTipo === 'rg' ? atual.documentoEmissor : '',
-    }));
-    setErros((atual) => ({ ...atual, documentoTipo: undefined, documentoEmissor: undefined }));
   }
 
   async function salvar(evento) {
@@ -176,30 +154,6 @@ export default function ModalEditarEstudante({ estudante, aoFechar, aoSalvar }) 
               </select>
             </div>
 
-            <div className="campo">
-              <label htmlFor="ed-doc-tipo">Documento de identidade</label>
-              <select id="ed-doc-tipo" value={form.documentoTipo} onChange={alterarTipoDocumento}>
-                {TIPOS_DOCUMENTO.map((t) => (
-                  <option key={t.valor} value={t.valor}>
-                    {t.rotulo}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="campo">
-              <label htmlFor="ed-doc-num">Número do documento</label>
-              <input id="ed-doc-num" value={form.documentoNumero} onChange={alterar('documentoNumero')} aria-invalid={Boolean(erros.documentoNumero)} />
-              {erros.documentoNumero ? <p className="erro">{erros.documentoNumero}</p> : null}
-            </div>
-
-            {form.documentoTipo === 'rg' ? (
-              <div className="campo">
-                <label htmlFor="ed-doc-emissor">Órgão expedidor</label>
-                <input id="ed-doc-emissor" placeholder="SSP/RS" value={form.documentoEmissor} onChange={alterar('documentoEmissor')} aria-invalid={Boolean(erros.documentoEmissor)} />
-                {erros.documentoEmissor ? <p className="erro">{erros.documentoEmissor}</p> : null}
-              </div>
-            ) : null}
           </div>
 
           <div className="campo">
