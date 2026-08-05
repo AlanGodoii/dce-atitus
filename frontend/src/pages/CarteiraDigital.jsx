@@ -202,8 +202,8 @@ export default function CarteiraDigital() {
             <div className="pix-caixa">
               <h3>Pagamento por PIX</h3>
               <p>
-                Faça o PIX e mande o comprovante no WhatsApp do DCE. O valor cobre a digital e a
-                física — o DCE avisa quando a física estiver pronta para retirada.
+                Faça o PIX e mande o comprovante no WhatsApp do DCE. O valor é o mesmo com ou sem a
+                via impressa; se você pediu a impressa, o DCE avisa quando estiver pronta.
               </p>
 
               <div className="pix-linha">

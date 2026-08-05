@@ -298,6 +298,17 @@
   overflow-wrap: anywhere;
 }
 
+/* Quem vai para a impressora precisa saltar aos olhos na fila — é a decisão
+   operacional que o DCE toma ao aprovar. */
+.marca-fisica {
+  color: var(--verde-700);
+  font-weight: 700;
+}
+.marca-fisica--nao {
+  color: var(--cinza-500);
+  font-weight: 500;
+}
+
 .fila-observacao {
   margin-top: 14px;
   padding: 11px 14px;

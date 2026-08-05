@@ -44,6 +44,7 @@ export default function ModalEditarEstudante({ estudante, aoFechar, aoSalvar }) 
     matricula: estudante.matricula ?? '',
     curso: estudante.curso ?? '',
     nivel: estudante.nivel ?? 'graduacao',
+    querFisica: estudante.querFisica ?? true,
     whatsapp: mascararTelefone(estudante.whatsappFormatado ?? ''),
   });
   const [erro, setErro] = useState('');
@@ -160,6 +161,19 @@ export default function ModalEditarEstudante({ estudante, aoFechar, aoSalvar }) 
             <label htmlFor="ed-curso">Curso</label>
             <input id="ed-curso" value={form.curso} onChange={alterar('curso')} aria-invalid={Boolean(erros.curso)} />
             {erros.curso ? <p className="erro">{erros.curso}</p> : null}
+          </div>
+
+          <div className="campo">
+            <label htmlFor="ed-fisica">Carteirinha física</label>
+            <select
+              id="ed-fisica"
+              value={form.querFisica ? 'sim' : 'nao'}
+              onChange={(e) => setForm((atual) => ({ ...atual, querFisica: e.target.value === 'sim' }))}
+            >
+              <option value="sim">Sim, retira no DCE</option>
+              <option value="nao">Não, só a digital</option>
+            </select>
+            <p className="ajuda">Não sai impresso no cartão, então mudar aqui não reemite nada.</p>
           </div>
 
           <div className="campo">

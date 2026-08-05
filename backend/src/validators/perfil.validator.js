@@ -68,6 +68,11 @@ export const perfilSchema = z.object({
 
   nivel: z.enum(NIVEIS, { errorMap: () => ({ message: 'Nível de ensino inválido.' }) }),
 
+  // Não é obrigatório na requisição: o padrão é querer, que era o comportamento
+  // antes desta escolha existir. Um cliente antigo que não mande o campo não
+  // deixa de conseguir salvar o perfil por isso.
+  querFisica: z.boolean({ invalid_type_error: 'Escolha sim ou não.' }).default(true),
+
   whatsapp: z
     .string({ required_error: 'Informe o WhatsApp.' })
     .trim()

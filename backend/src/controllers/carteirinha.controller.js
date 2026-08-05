@@ -189,6 +189,7 @@ export async function reenviarEmail(req, res) {
     usuario: perfil.usuario,
     carteirinha,
     caminhos,
+    querFisica: perfil.querFisica,
   });
 
   if (!resultado.enviado) {

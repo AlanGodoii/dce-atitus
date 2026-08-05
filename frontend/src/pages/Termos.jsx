@@ -70,7 +70,8 @@ export default function Termos() {
           <p>
             Permite que estudantes solicitem a CIE pela internet: você cria uma conta, informa seus
             dados, envia foto e comprovante de matrícula, paga a taxa e, após a conferência pelo
-            DCE, recebe a carteirinha digital por e-mail. A versão física é retirada no DCE.
+            DCE, recebe a carteirinha digital por e-mail. No cadastro você escolhe se também quer a
+            versão física, que é retirada no DCE.
           </p>
 
           <h2>3. Dados que coletamos</h2>
@@ -109,7 +110,7 @@ export default function Termos() {
             </li>
             <li>
               <strong>Falar com você:</strong> confirmação de cadastro, entrega da carteirinha e
-              avisos sobre o pagamento e a retirada da via física.
+              avisos sobre o pagamento e, se você pediu a via física, sobre a retirada.
             </li>
           </ul>
 
@@ -200,9 +201,9 @@ export default function Termos() {
 
           <h2>11. Pagamento e cancelamento</h2>
           <p>
-            A taxa cobre a emissão da carteirinha digital e da via física. O DCE confere o
-            comprovante manualmente; se o pagamento não for identificado, o pedido é recusado e você
-            pode reenviar o comprovante.
+            A taxa cobre a emissão da carteirinha digital e, para quem pedir, também da via física —
+            o valor é o mesmo nos dois casos. O DCE confere o comprovante manualmente; se o pagamento
+            não for identificado, o pedido é recusado e você pode reenviar o comprovante.
           </p>
           <p>
             Se você desistir antes da emissão, procure o DCE pelos canais de contato. Depois de

@@ -8,7 +8,7 @@
  * Se subir a versão e quiser exigir novo aceite de quem já usa o sistema,
  * compare `usuario.aceiteTermosVersao` com esta constante.
  */
-export const VERSAO_TERMOS = '1.0';
+export const VERSAO_TERMOS = '1.1';
 
 /** Data da última revisão do texto, exibida nas páginas públicas. */
-export const VIGENCIA_TERMOS = '2026-08-02';
+export const VIGENCIA_TERMOS = '2026-08-05';

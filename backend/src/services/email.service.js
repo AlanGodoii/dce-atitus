@@ -113,9 +113,18 @@ function layout(titulo, corpoHtml) {
 const paragrafo = (texto) =>
   `<p style="margin:0 0 14px;font-size:15px;line-height:1.65;color:#3a4744;">${texto}</p>`;
 
-export async function enviarCarteirinhaAprovada({ usuario, carteirinha, caminhos }) {
+/**
+ * @param {boolean} [querFisica] se o aluno pediu tambem a via impressa. Quem
+ *   escolheu so a digital nao pode receber "retire no DCE" — a via dele nao
+ *   existe, e o aviso mandaria a pessoa ate la para nada.
+ */
+export async function enviarCarteirinhaAprovada({ usuario, carteirinha, caminhos, querFisica = true }) {
   const validade = formatarDataBr(carteirinha.dataValidade);
   const linkArea = `${env.frontendUrl}/carteirinha`;
+
+  const sobreFisica = querFisica
+    ? '<strong>Carteirinha física:</strong> você pediu a via impressa, e ela deve ser retirada no DCE. Nossa equipe entra em contato pelo WhatsApp para combinar a retirada.'
+    : '<strong>Carteirinha física:</strong> você optou por receber só a versão digital. Se mudar de ideia, é só avisar o DCE pelo WhatsApp — não há custo adicional.';
 
   const html = layout(
     `Sua carteirinha está pronta, ${usuario.nome.split(' ')[0]}!`,
@@ -123,7 +132,7 @@ export async function enviarCarteirinhaAprovada({ usuario, carteirinha, caminhos
     ${paragrafo('Seu pagamento foi confirmado e a sua Carteira de Identificação Estudantil já está emitida.')}
     ${paragrafo(`Ela é <strong>válida até ${validade}</strong>. Os arquivos estão anexados neste e-mail: a frente, o verso e um PDF pronto para impressão.`)}
     ${paragrafo('O QR Code impresso na frente permite que qualquer estabelecimento confirme a autenticidade do documento na hora.')}
-    ${paragrafo('<strong>Carteirinha física:</strong> ela está inclusa e deve ser retirada no DCE. Nossa equipe entra em contato pelo WhatsApp para combinar a retirada.')}
+    ${paragrafo(sobreFisica)}
     <p style="margin:26px 0 8px;">
       <a href="${linkArea}" style="display:inline-block;background:${VERDE};color:#fff;text-decoration:none;padding:13px 26px;border-radius:8px;font-size:15px;font-weight:600;">Ver minha carteirinha</a>
     </p>`,

@@ -138,6 +138,7 @@ export default function AdminEstudantes() {
                   <th>Estudante</th>
                   <th>Matrícula</th>
                   <th>Curso</th>
+                  <th>Física</th>
                   <th>Status</th>
                   <th>Validade</th>
                   <th>Documentos</th>
@@ -170,6 +171,11 @@ export default function AdminEstudantes() {
                     </td>
                     <td>{e.matricula}</td>
                     <td>{e.curso}</td>
+                    <td>
+                      <span className={e.querFisica ? 'marca-fisica' : 'marca-fisica--nao'}>
+                        {e.querFisica ? 'Sim' : 'Não'}
+                      </span>
+                    </td>
                     <td>
                       {e.carteirinha ? (
                         <span className={`selo selo-${e.carteirinha.status}`}>

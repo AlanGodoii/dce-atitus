@@ -21,6 +21,9 @@ const VAZIO = {
   matricula: '',
   curso: '',
   nivel: 'graduacao',
+  // Já vem marcado: a física está inclusa no mesmo valor, então querer é o
+  // caso comum. Quem não quiser desmarca.
+  querFisica: true,
   whatsapp: '',
 };
 
@@ -80,6 +83,7 @@ export default function MeuPerfil() {
             matricula: data.perfil.matricula ?? '',
             curso: data.perfil.curso ?? '',
             nivel: data.perfil.nivel ?? 'graduacao',
+            querFisica: data.perfil.querFisica ?? true,
             whatsapp: mascararTelefone(data.perfil.whatsapp ?? ''),
           });
         } else {
@@ -308,6 +312,28 @@ export default function MeuPerfil() {
                   required
                 />
                 {erros.curso ? <p className="erro">{erros.curso}</p> : null}
+              </div>
+
+              <div className="campo">
+                <label htmlFor="querFisica">
+                  Carteirinha física <span className="obrigatorio">*</span>
+                </label>
+                <select
+                  id="querFisica"
+                  value={form.querFisica ? 'sim' : 'nao'}
+                  onChange={(e) => {
+                    setForm((atual) => ({ ...atual, querFisica: e.target.value === 'sim' }));
+                    setSucesso('');
+                  }}
+                  required
+                >
+                  <option value="sim">Sim, quero retirar no DCE</option>
+                  <option value="nao">Não, só a digital</option>
+                </select>
+                <p className="ajuda">
+                  A digital chega no seu e-mail de qualquer forma. O valor é o mesmo nos dois
+                  casos — a escolha serve para o DCE saber quantos cartões imprimir.
+                </p>
               </div>
 
               <div className="campo">

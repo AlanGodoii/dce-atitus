@@ -242,6 +242,12 @@ export default function AdminPagamentos() {
                   <span>Avisou em</span>
                   <strong>{formatarDataHora(p.solicitadoEm)}</strong>
                 </div>
+                <div>
+                  <span>Carteirinha física</span>
+                  <strong className={p.estudante.querFisica ? 'marca-fisica' : 'marca-fisica--nao'}>
+                    {p.estudante.querFisica ? 'SIM — imprimir' : 'Não, só digital'}
+                  </strong>
+                </div>
               </div>
 
               {p.observacaoEstudante ? (

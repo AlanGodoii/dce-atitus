@@ -166,6 +166,24 @@ checar('REEMITIU a carteirinha', r.dados.reemissao?.reemitida === true, JSON.str
 checar('gerou arquivo novo', !!r.dados.reemissao?.arquivoUrl);
 checar('reportou o envio de e-mail', typeof r.dados.email?.enviado === 'boolean', JSON.stringify(r.dados.email));
 
+console.log('\n== escolha da via fisica nao reemite ==');
+// Nao sai impresso no cartao. Reemitir por causa dela geraria arquivo novo e um
+// e-mail avisando o aluno de uma correcao que nao existe no documento.
+r = await req('PATCH', `/admin/estudantes/${perfilId}`, { ...base, curso: cursoNovo, querFisica: false }, tk);
+checar('edicao aceita (200)', r.status === 200, JSON.stringify(r.dados).slice(0, 150));
+checar(
+  'identifica querFisica como alterado',
+  (r.dados.camposAlterados ?? []).includes('querFisica'),
+  JSON.stringify(r.dados.camposAlterados),
+);
+checar('NAO reemitiu', r.dados.reemissao?.reemitida === false, JSON.stringify(r.dados.reemissao));
+
+const apos = await req('GET', `/admin/estudantes?busca=${encodeURIComponent(aluno.email)}`, null, tk);
+checar('escolha persistiu como false', apos.dados.estudantes[0]?.querFisica === false, String(apos.dados.estudantes[0]?.querFisica));
+
+r = await req('PATCH', `/admin/estudantes/${perfilId}`, { ...base, curso: cursoNovo, querFisica: true }, tk);
+checar('volta para true sem reemitir', r.dados.reemissao?.reemitida === false, JSON.stringify(r.dados.reemissao));
+
 console.log('\n== o QR continua o mesmo ==');
 const depois = await req('GET', `/admin/estudantes?busca=${encodeURIComponent(aluno.email)}`, null, tk);
 const alunoDepois = depois.dados.estudantes[0];

@@ -2,6 +2,7 @@ import { prisma } from '../config/prisma.js';
 import { AppError } from '../utils/AppError.js';
 import { formatarCpf, formatarTelefoneExibicao } from '../utils/validadores.js';
 import { ROTULO_NIVEL } from '../validators/perfil.validator.js';
+import { CAMPOS_IMPRESSOS } from './perfil.controller.js';
 import {
   calcularValidade,
   gerarArquivosCarteirinha,
@@ -48,6 +49,8 @@ function serializarPagamento(pagamento) {
       matricula: perfil.matricula,
       curso: perfil.curso,
       nivelRotulo: ROTULO_NIVEL[perfil.nivel] ?? perfil.nivel,
+      // O DCE decide aqui o que vai para a impressora, na hora de aprovar.
+      querFisica: perfil.querFisica,
       fotoUrl: perfil.fotoUrl,
       perfilId: perfil.id,
       // O arquivo em si sai por rota autenticada, nunca por URL publica.
@@ -180,6 +183,7 @@ export async function aprovarPagamento(req, res) {
       usuario,
       carteirinha: { ...emitida, dataValidade },
       caminhos: arquivos.caminhos,
+      querFisica: perfil.querFisica,
     });
   }
 
@@ -270,6 +274,7 @@ export async function listarEstudantes(req, res) {
         nivel: perfil.nivel,
         dataNascimento: perfil.dataNascimento.toISOString().slice(0, 10),
         nivelRotulo: ROTULO_NIVEL[perfil.nivel] ?? perfil.nivel,
+        querFisica: perfil.querFisica,
         fotoUrl: perfil.fotoUrl,
         cadastradoEm: perfil.usuario.criadoEm,
         carteirinha: carteirinha
@@ -299,7 +304,7 @@ export async function listarEstudantes(req, res) {
  */
 export async function editarEstudante(req, res) {
   const { perfilId } = req.params;
-  const { nome, cpf, dataNascimento, matricula, curso, nivel, whatsapp } = req.body;
+  const { nome, cpf, dataNascimento, matricula, curso, nivel, querFisica, whatsapp } = req.body;
 
   const perfil = await prisma.perfilEstudante.findUnique({
     where: { id: perfilId },
@@ -322,6 +327,7 @@ export async function editarEstudante(req, res) {
     matricula: perfil.matricula,
     curso: perfil.curso,
     nivel: perfil.nivel,
+    querFisica: perfil.querFisica,
     dataNascimento: perfil.dataNascimento.toISOString().slice(0, 10),
   };
 
@@ -329,7 +335,7 @@ export async function editarEstudante(req, res) {
     prisma.usuario.update({ where: { id: perfil.usuarioId }, data: { nome, whatsapp } }),
     prisma.perfilEstudante.update({
       where: { id: perfil.id },
-      data: { cpf, dataNascimento, matricula, curso, nivel },
+      data: { cpf, dataNascimento, matricula, curso, nivel, querFisica },
     }),
   ]);
 
@@ -339,6 +345,7 @@ export async function editarEstudante(req, res) {
     matricula,
     curso,
     nivel,
+    querFisica,
     dataNascimento: new Date(dataNascimento).toISOString().slice(0, 10),
   };
 
@@ -351,7 +358,13 @@ export async function editarEstudante(req, res) {
   );
 
   const carteirinha = perfil.carteirinhas[0];
-  const precisaReemitir = carteirinha?.status === 'aprovada' && alterados.length > 0;
+
+  // Só reemite quando muda algo que SAI IMPRESSO. Marcar que o aluno não quer
+  // mais a via física altera o que o DCE manda para a impressora, não o
+  // conteúdo do documento — reemitir por isso geraria arquivo novo e um e-mail
+  // avisando de uma correção que não existe.
+  const impressosAlterados = alterados.filter((campo) => CAMPOS_IMPRESSOS.includes(campo));
+  const precisaReemitir = carteirinha?.status === 'aprovada' && impressosAlterados.length > 0;
 
   let reemissao = { reemitida: false };
   let email = { enviado: false, motivo: 'Carteirinha não estava emitida.' };
@@ -365,6 +378,7 @@ export async function editarEstudante(req, res) {
         usuario: { ...usuario, nome },
         carteirinha: atualizada,
         caminhos: arquivos.caminhos,
+        querFisica,
       });
     } catch (erro) {
       console.error('[admin] falha ao reemitir apos edicao:', erro);

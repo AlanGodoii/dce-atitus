@@ -7,7 +7,7 @@ import { caminhoComprovante, removerArquivoSilencioso, urlParaCaminho } from '..
 
 // Campos que saem impressos na carteirinha: uma vez emitida, mudar qualquer um
 // deles faria o documento em circulacao divergir do banco.
-const CAMPOS_IMPRESSOS = ['nome', 'cpf', 'dataNascimento', 'matricula', 'curso', 'nivel'];
+export const CAMPOS_IMPRESSOS = ['nome', 'cpf', 'dataNascimento', 'matricula', 'curso', 'nivel'];
 
 export function serializarPerfil(usuario) {
   const perfil = usuario.perfil;
@@ -23,6 +23,7 @@ export function serializarPerfil(usuario) {
     matricula: perfil.matricula,
     curso: perfil.curso,
     nivel: perfil.nivel,
+    querFisica: perfil.querFisica,
     fotoUrl: perfil.fotoUrl,
     // O arquivo em si nunca vai na resposta — so a informacao de que existe.
     temComprovante: Boolean(perfil.comprovanteArquivo),
@@ -61,7 +62,7 @@ export async function obterPerfil(req, res) {
 }
 
 export async function salvarPerfil(req, res) {
-  const { nome, cpf, dataNascimento, matricula, curso, nivel, whatsapp } = req.body;
+  const { nome, cpf, dataNascimento, matricula, curso, nivel, querFisica, whatsapp } = req.body;
   const usuarioId = req.usuario.id;
 
   const existente = await prisma.perfilEstudante.findUnique({
@@ -106,7 +107,10 @@ export async function salvarPerfil(req, res) {
       data: { nome, whatsapp },
     });
 
-    const campos = { cpf, dataNascimento, matricula, curso, nivel };
+    // querFisica fica FORA de CAMPOS_IMPRESSOS de propósito: não vai no cartão,
+    // então o aluno pode mudar de ideia depois de emitida sem disparar
+    // reemissão nem esbarrar no bloqueio de dados já impressos.
+    const campos = { cpf, dataNascimento, matricula, curso, nivel, querFisica };
 
     const salvo = await tx.perfilEstudante.upsert({
       where: { usuarioId },

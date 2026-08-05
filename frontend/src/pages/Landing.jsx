@@ -20,7 +20,7 @@ const BENEFICIOS = [
   {
     titulo: 'Digital e física',
     texto:
-      'A digital chega no seu e-mail e fica na área do estudante. A física está inclusa no mesmo pagamento e o DCE entra em contato para você retirar.',
+      'A digital chega no seu e-mail e fica na área do estudante. Se você também quiser a impressa, é só marcar no cadastro — vem no mesmo pagamento e o DCE entra em contato para a retirada.',
     icone: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
         <rect x="6.5" y="2.5" width="11" height="19" rx="2.5" />
@@ -176,7 +176,7 @@ export default function Landing() {
                 })}
               </strong>
               <span>
-                Já inclui a versão digital e a física — o DCE entra em contato para a retirada.
+                Cobre a versão digital e também a impressa, para quem quiser — sem custo extra.
               </span>
             </p>
           ) : null}

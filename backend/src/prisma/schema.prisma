@@ -129,6 +129,15 @@ model PerfilEstudante {
   curso          String      @db.VarChar(120)
   nivel          NivelEnsino @default(graduacao)
 
+  /// Se o aluno quer tambem a via fisica, que e retirada no DCE. O preco cobre
+  /// as duas versoes de qualquer jeito — isto existe para o DCE saber o que
+  /// imprimir, e nao imprimir cartao que ninguem vai buscar.
+  ///
+  /// Default true porque os perfis criados antes deste campo foram cadastrados
+  /// quando a fisica vinha automatica; assumir false quebraria a promessa feita
+  /// a eles.
+  querFisica Boolean @default(true) @map("quer_fisica")
+
   /// SEM USO desde 04/08/2026: o DCE decidiu que a carteirinha nao leva mais
   /// documento de identidade, entao nada preenche nem le estas colunas.
   ///
