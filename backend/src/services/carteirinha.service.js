@@ -77,6 +77,19 @@ async function fotoComoDataUri(fotoUrl) {
   }
 }
 
+/**
+ * Multiplicador da resolucao do PNG.
+ *
+ * O layout e desenhado em 1011x638, que ja e 300 dpi para um cartao de
+ * 85,6 x 54 mm — o minimo que grafica aceita. Com 2 sai em 2022x1276, ou seja
+ * 600 dpi, e o texto miudo dos rotulos para de esfarelar na impressao.
+ *
+ * Nao passe de 2 sem antes aumentar a foto do aluno: ela e guardada em 600x800
+ * (foto.service.js) e ocupa 452x574 no cartao a 600 dpi. Em 900 dpi o navegador
+ * teria que ampliar a foto, e o cartao inteiro ficaria mais nitido que o rosto.
+ */
+const ESCALA_IMPRESSAO = 2;
+
 async function renderizarPng(html, destino) {
   const navegador = await obterNavegador();
   const pagina = await navegador.newPage();
@@ -84,7 +97,7 @@ async function renderizarPng(html, destino) {
     await pagina.setViewport({
       width: DIMENSOES.largura,
       height: DIMENSOES.altura,
-      deviceScaleFactor: 1,
+      deviceScaleFactor: ESCALA_IMPRESSAO,
     });
     await pagina.setContent(html, { waitUntil: 'load' });
     await pagina.evaluate(() => document.fonts.ready);

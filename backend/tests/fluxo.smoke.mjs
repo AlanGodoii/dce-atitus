@@ -181,7 +181,11 @@ const imgFrente = await fetch(urlFrente);
 const bufFrente = Buffer.from(await imgFrente.arrayBuffer());
 const metaFrente = await sharp(bufFrente).metadata();
 checar('PNG da frente acessivel', imgFrente.status === 200);
-checar('PNG no tamanho de cartao 300dpi (1011x638)', metaFrente.width === 1011 && metaFrente.height === 638, `${metaFrente.width}x${metaFrente.height}`);
+// 2022x1276 = 600 dpi para um cartao de 85,6 x 54 mm. E o dobro do layout, que
+// e desenhado em 1011x638 (300 dpi). Grafica aceita 300, mas o texto miudo dos
+// rotulos so fica limpo em 600.
+checar('PNG da frente em 600dpi (2022x1276)', metaFrente.width === 2022 && metaFrente.height === 1276, `${metaFrente.width}x${metaFrente.height}`);
+checar('proporcao de cartao mantida', Math.abs(metaFrente.width / metaFrente.height - 1011 / 638) < 0.001);
 
 const pdf = await fetch(urlPdf);
 const bufPdf = Buffer.from(await pdf.arrayBuffer());

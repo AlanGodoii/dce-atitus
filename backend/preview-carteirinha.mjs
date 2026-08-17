@@ -34,9 +34,17 @@ const dados = {
 
 const navegador = await obterNavegador();
 
+// Mesma escala da emissão real (ver ESCALA_IMPRESSAO em carteirinha.service.js),
+// senão o preview mentiria sobre a nitidez do que o aluno recebe.
+const ESCALA = 2;
+
 async function render(html, arquivo) {
   const pagina = await navegador.newPage();
-  await pagina.setViewport({ ...{ width: DIMENSOES.largura, height: DIMENSOES.altura }, deviceScaleFactor: 1 });
+  await pagina.setViewport({
+    width: DIMENSOES.largura,
+    height: DIMENSOES.altura,
+    deviceScaleFactor: ESCALA,
+  });
   await pagina.setContent(html, { waitUntil: 'load' });
   await pagina.evaluate(() => document.fonts.ready);
   await pagina.screenshot({ path: path.join(SAIDA, arquivo), type: 'png', omitBackground: true });
@@ -59,17 +67,24 @@ const [f, v] = await Promise.all([
   fs.readFile(path.join(SAIDA, 'frente.png')),
   fs.readFile(path.join(SAIDA, 'verso.png')),
 ]);
+// A tela precisa acompanhar a escala: com ESCALA fixa numa e a moldura noutra,
+// o sharp recusa compor ("image to composite must have same dimensions or
+// smaller") e o script morre no último passo.
+const larguraFace = DIMENSOES.largura * ESCALA;
+const alturaFace = DIMENSOES.altura * ESCALA;
+const margem = 40 * ESCALA;
+
 await sharp({
   create: {
-    width: DIMENSOES.largura + 80,
-    height: DIMENSOES.altura * 2 + 120,
+    width: larguraFace + margem * 2,
+    height: alturaFace * 2 + margem * 3,
     channels: 4,
     background: { r: 247, g: 248, b: 247, alpha: 1 },
   },
 })
   .composite([
-    { input: f, top: 40, left: 40 },
-    { input: v, top: DIMENSOES.altura + 80, left: 40 },
+    { input: f, top: margem, left: margem },
+    { input: v, top: alturaFace + margem * 2, left: margem },
   ])
   .png()
   .toFile(path.join(SAIDA, 'comparativo.png'));

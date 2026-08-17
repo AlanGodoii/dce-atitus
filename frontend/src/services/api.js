@@ -67,6 +67,32 @@ export async function abrirArquivoProtegido(caminho) {
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
+/**
+ * Baixa um arquivo público (as imagens da carteirinha em /uploads) forçando o
+ * salvamento, com o nome que a gente escolhe.
+ *
+ * Um `<a download>` simples NÃO resolve aqui: a API vive em outra origem que o
+ * site, e o navegador ignora o atributo `download` em link cross-origin — abre
+ * numa aba em vez de baixar. Buscar como blob traz o arquivo para a mesma
+ * origem, e aí o download acontece de verdade.
+ */
+export async function baixarArquivo(url, nomeArquivo) {
+  const resposta = await fetch(url);
+  if (!resposta.ok) throw new Error(`Não foi possível baixar (HTTP ${resposta.status}).`);
+
+  const blob = await resposta.blob();
+  const objectUrl = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = objectUrl;
+  link.download = nomeArquivo;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(objectUrl);
+}
+
 /** Mapa campo -> mensagem, para marcar o input exato que falhou. */
 export function errosPorCampo(erro) {
   const detalhes = erro?.response?.data?.detalhes;

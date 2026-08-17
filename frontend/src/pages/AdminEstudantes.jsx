@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { abrirArquivoProtegido, api, mensagemDeErro } from '../services/api';
+import { abrirArquivoProtegido, api, baixarArquivo, mensagemDeErro } from '../services/api';
 import Carregando from '../components/Carregando';
 import ModalEditarEstudante from '../components/ModalEditarEstudante';
 import './Painel.css';
@@ -53,6 +53,29 @@ export default function AdminEstudantes() {
     const id = setTimeout(() => carregar(busca, status), 350);
     return () => clearTimeout(id);
   }, [busca, status, carregar]);
+
+  /**
+   * Baixa frente e verso em PNG, que é o que a gráfica precisa. O PDF continua
+   * acessível pela área do aluno, mas é folha A4 para impressão caseira — mandar
+   * aquilo para gráfica é o que fazia a resolução parecer ruim.
+   */
+  async function baixarCarteirinha(estudante) {
+    setErro('');
+    const base = (estudante.nome ?? 'aluno')
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+    try {
+      await baixarArquivo(estudante.carteirinha.arquivoUrl, `${base}-frente.png`);
+      if (estudante.carteirinha.arquivoVersoUrl) {
+        await baixarArquivo(estudante.carteirinha.arquivoVersoUrl, `${base}-verso.png`);
+      }
+    } catch (e) {
+      setErro(e.message ?? 'Não foi possível baixar a carteirinha.');
+    }
+  }
 
   async function verComprovante(estudante) {
     setErro('');
@@ -189,15 +212,14 @@ export default function AdminEstudantes() {
                     <td>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         {e.carteirinha?.arquivoUrl ? (
-                          <a
-                            href={e.carteirinha.arquivoUrl.replace(/-frente\.png$/, '.pdf')}
-                            target="_blank"
-                            rel="noreferrer"
+                          <button
+                            type="button"
                             className="btn-texto"
-                            style={{ padding: 0 }}
+                            style={{ padding: 0, border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left' }}
+                            onClick={() => baixarCarteirinha(e)}
                           >
-                            Carteirinha
-                          </a>
+                            Baixar PNG
+                          </button>
                         ) : null}
                         {e.temComprovante ? (
                           <button

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api, mensagemDeErro } from '../services/api';
+import { api, baixarArquivo, mensagemDeErro } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import CarteirinhaVisual from '../components/CarteirinhaVisual';
 import AvisoEmailNaoVerificado from '../components/AvisoEmailNaoVerificado';
@@ -31,6 +31,7 @@ export default function CarteiraDigital() {
   const [aviso, setAviso] = useState('');
   const [ocupado, setOcupado] = useState(false);
   const [copiado, setCopiado] = useState(false);
+  const [baixando, setBaixando] = useState('');
 
   const carregar = useCallback(async () => {
     try {
@@ -70,6 +71,26 @@ export default function CarteiraDigital() {
       setErro(mensagemDeErro(e));
     } finally {
       setOcupado(false);
+    }
+  }
+
+  /** Nome do arquivo salvo: quem baixa precisa reconhecer depois, na pasta. */
+  async function baixar(url, qual) {
+    setBaixando(qual);
+    setErro('');
+    try {
+      const sufixo = { frente: 'frente.png', verso: 'verso.png', pdf: 'impressao.pdf' }[qual];
+      const nome = (usuario?.nome ?? 'carteirinha')
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+      await baixarArquivo(url, `carteirinha-${nome}-${sufixo}`);
+    } catch (e) {
+      setErro(e.message ?? 'Não foi possível baixar o arquivo.');
+    } finally {
+      setBaixando('');
     }
   }
 
@@ -175,17 +196,40 @@ export default function CarteiraDigital() {
               </div>
 
               <div className="carteira-acoes">
-                <a
+                <button
+                  type="button"
                   className="btn btn-primario"
-                  href={carteirinha.arquivoUrl.replace(/-frente\.png$/, '.pdf')}
-                  download
+                  onClick={() => baixar(carteirinha.arquivoUrl, 'frente')}
+                  disabled={baixando}
                 >
-                  Baixar PDF
-                </a>
+                  {baixando === 'frente' ? 'Baixando...' : 'Baixar frente (PNG)'}
+                </button>
+                {carteirinha.arquivoVersoUrl ? (
+                  <button
+                    type="button"
+                    className="btn btn-contorno"
+                    onClick={() => baixar(carteirinha.arquivoVersoUrl, 'verso')}
+                    disabled={baixando}
+                  >
+                    {baixando === 'verso' ? 'Baixando...' : 'Baixar verso (PNG)'}
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  className="btn btn-contorno"
+                  onClick={() => baixar(carteirinha.arquivoUrl.replace(/-frente\.png$/, '.pdf'), 'pdf')}
+                  disabled={baixando}
+                >
+                  {baixando === 'pdf' ? 'Baixando...' : 'Baixar PDF'}
+                </button>
                 <button type="button" className="btn btn-contorno" onClick={reenviarEmail} disabled={ocupado}>
                   {ocupado ? 'Enviando...' : 'Reenviar por e-mail'}
                 </button>
               </div>
+              <p className="pagina__sub" style={{ marginTop: 10 }}>
+                Para imprimir numa gráfica, prefira os PNG: eles saem em 600 dpi, na medida exata do
+                cartão. O PDF é a folha pronta para imprimir em casa e recortar.
+              </p>
             </>
           ) : (
             <>
