@@ -55,11 +55,15 @@ export default function AdminEstudantes() {
   }, [busca, status, carregar]);
 
   /**
-   * Baixa frente e verso em PNG, que é o que a gráfica precisa. O PDF continua
-   * acessível pela área do aluno, mas é folha A4 para impressão caseira — mandar
-   * aquilo para gráfica é o que fazia a resolução parecer ruim.
+   * Baixa UMA face em PNG, que é o que a gráfica precisa. O PDF continua na área
+   * do aluno, mas é folha A4 para impressão caseira — mandar aquilo para gráfica
+   * é o que fazia a resolução parecer ruim.
+   *
+   * Uma face por clique de propósito. Encadear os dois downloads não funciona: o
+   * Chrome bloqueia o segundo arquivo disparado em sequência pela mesma página,
+   * e ele some sem erro nenhum — o usuário fica achando que só existe a frente.
    */
-  async function baixarCarteirinha(estudante) {
+  async function baixarFace(estudante, face) {
     setErro('');
     const base = (estudante.nome ?? 'aluno')
       .normalize('NFD')
@@ -67,11 +71,16 @@ export default function AdminEstudantes() {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
+
+    const url =
+      face === 'verso' ? estudante.carteirinha.arquivoVersoUrl : estudante.carteirinha.arquivoUrl;
+    if (!url) {
+      setErro(`Esta carteirinha não tem arquivo de ${face}.`);
+      return;
+    }
+
     try {
-      await baixarArquivo(estudante.carteirinha.arquivoUrl, `${base}-frente.png`);
-      if (estudante.carteirinha.arquivoVersoUrl) {
-        await baixarArquivo(estudante.carteirinha.arquivoVersoUrl, `${base}-verso.png`);
-      }
+      await baixarArquivo(url, `${base}-${face}.png`);
     } catch (e) {
       setErro(e.message ?? 'Não foi possível baixar a carteirinha.');
     }
@@ -216,9 +225,19 @@ export default function AdminEstudantes() {
                             type="button"
                             className="btn-texto"
                             style={{ padding: 0, border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left' }}
-                            onClick={() => baixarCarteirinha(e)}
+                            onClick={() => baixarFace(e, 'frente')}
                           >
-                            Baixar PNG
+                            PNG frente
+                          </button>
+                        ) : null}
+                        {e.carteirinha?.arquivoVersoUrl ? (
+                          <button
+                            type="button"
+                            className="btn-texto"
+                            style={{ padding: 0, border: 'none', background: 'none', cursor: 'pointer', textAlign: 'left' }}
+                            onClick={() => baixarFace(e, 'verso')}
+                          >
+                            PNG verso
                           </button>
                         ) : null}
                         {e.temComprovante ? (
